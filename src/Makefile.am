@@ -1,4 +1,4 @@
-bin_PROGRAMS = xfwm4
+bin_PROGRAMS = xfwm4 xfwm4-wayland
 
 xfwm4_SOURCES =								\
 	client.c							\
@@ -111,6 +111,32 @@ xfwm4_LDADD =								\
 	$(RENDER_LIBS)							\
 	$(XINERAMA_LIBS)						\
 	$(MATH_LIBS)
+
+xfwm4_wayland_SOURCES =							\
+	compositor-wayland.c						\
+	server.h							\
+	shell.c								\
+	shell.h
+
+xfwm4_wayland_CFLAGS =							\
+	$(WAYLAND_SERVER_CFLAGS)					\
+	$(LIBWESTON_CFLAGS)						\
+	$(LIBWESTON_DESKTOP_CFLAGS)					\
+	$(LIBINPUT_CFLAGS)						\
+	$(PIXMAN_CFLAGS)						\
+	$(XKBCOMMON_CFLAGS)						\
+	$(EGL_CFLAGS)							\
+	$(EVDEV_CFLAGS)
+
+xfwm4_wayland_LDADD =							\
+	$(WAYLAND_SERVER_LIBS)						\
+	$(LIBWESTON_LIBS)						\
+	$(LIBWESTON_DESKTOP_LIBS)					\
+	$(LIBINPUT_LIBS)						\
+	$(PIXMAN_LIBS)							\
+	$(XKBCOMMON_LIBS)						\
+	$(EGL_LIBS)							\
+	$(EVDEV_LIBS)
 
 AM_CPPFLAGS = 								\
 	-I${top_srcdir} 						\

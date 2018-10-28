@@ -100,6 +100,15 @@ AC_CHECK_LIB([Xi], [XISelectEvents],
     fi
   ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS])
 
+XDT_CHECK_PACKAGE([WAYLAND_SERVER], [wayland-server], [1.0.0])
+XDT_CHECK_PACKAGE([LIBWESTON], [libweston-4], [4.0.0])
+XDT_CHECK_PACKAGE([LIBWESTON_DESKTOP], [libweston-desktop-4], [4.0.0])
+XDT_CHECK_PACKAGE([LIBINPUT], [libinput], [1.10.0])
+XDT_CHECK_PACKAGE([PIXMAN], [pixman-1], [0.34.0])
+XDT_CHECK_PACKAGE([XKBCOMMON], [xkbcommon], [0.8.0])
+XDT_CHECK_PACKAGE([EGL], [egl], [1.0.0])
+XDT_CHECK_PACKAGE([EVDEV], [libevdev], [1.5.8])
+
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
 XDT_CHECK_PACKAGE([LIBXFCE4UTIL], [libxfce4util-1.0], [xfce_minimum_version])
 XDT_CHECK_PACKAGE([LIBXFCE4UI], libxfce4ui-2, [libxfce4ui_minimum_version])
