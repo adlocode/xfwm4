@@ -713,7 +713,7 @@ main (int argc, char **argv)
      * any other display server (like when running nested within a
      * Wayland compositor).
      */
-    gdk_set_allowed_backends ("x11");
+    //gdk_set_allowed_backends ("x11");
 
 #ifndef HAVE_XI2
     /* Disable XI2 in GDK */
