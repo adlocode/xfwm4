@@ -185,6 +185,13 @@ xfwm4_wayland_shell_SOURCES =								\
 	xpm-color-table.h
 
 xfwm4_wayland_shell_CFLAGS =								\
+	$(WAYLAND_SERVER_CFLAGS) \
+	$(LIBWESTON_CFLAGS) \
+	$(LIBWESTON_DESKTOP_CFLAGS) \
+	$(LIBINPUT_CFLAGS) \
+	$(XKBCOMMON_CFLAGS) \
+	$(EGL_CFLAGS) \
+	$(EVDEV_CFLAGS) \
 	$(GLIB_CFLAGS) 							\
 	$(GTK_CFLAGS) 							\
 	$(COMPOSITOR_CFLAGS)						\
@@ -206,6 +213,14 @@ xfwm4_wayland_shell_CFLAGS =								\
 	-DG_LOG_DOMAIN=\"xfwm4\"
 
 xfwm4_wayland_shell_LDADD =								\
+	$(WAYLAND_SERVER_LIBS) \
+	$(LIBWESTON_LIBS) \
+	$(LIBWESTON_DESKTOP_LIBS) \
+	$(LIBINPUT_LIBS) \
+	$(XKBCOMMON_LIBS) \
+	$(EGL_LIBS) \
+	$(EVDEV_LIBS) \
+	$(PIXMAN_LIBS) \
 	$(top_builddir)/common/libxfwm-common.la 			\
 	$(GLIB_LIBS) 							\
 	$(GTK_LIBS) 							\

@@ -1,0 +1,29 @@
+<protocol name="xfway">
+
+  <interface name="xfway_shell" version="1">
+    <description summary="create desktop widgets and helpers">
+      Traditional user interfaces can rely on this interface to define the
+      foundations of typical desktops. Currently it's possible to set up
+      background, panels and locking surfaces.
+    </description>
+
+  <event name = "tabwin">
+    <description summary = "tell client to create an alt-tab switcher">
+      Tell the client to create an alt-tab switcher.
+    </description>
+  </event>
+
+  <event name = "tabwin_next">
+    <description summary = "tell client to select the next window">
+      Tell the client to select the next window in the switcher.
+    </description>
+  </event>
+
+  <event name = "tabwin_destroy">
+    <description summary = "tell client to destroy the alt-tab switcher">
+      Tell the client to destroy the alt-tab switcher.
+    </description>
+  </event>
+
+  </interface>
+</protocol>

@@ -47,6 +47,8 @@
 #include <signal.h>
 #include <string.h>
 
+#include <wayland-client.h>
+
 #include "display.h"
 #include "screen.h"
 #include "events.h"
