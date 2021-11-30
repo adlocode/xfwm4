@@ -1,4 +1,8 @@
-bin_PROGRAMS = xfwm4 xfwm4-wayland-shell
+bin_PROGRAMS = xfwm4 xfwm4-wayland xfwm4-wayland-shell
+
+xfwm4_wayland_CPPFLAGS = 					\
+	-DBINDIR='"$(bindir)"'			\
+	-DLIBEXECDIR='"$(libexecdir)"'	
 
 xfwm4_SOURCES =								\
 	client.c							\
@@ -111,6 +115,57 @@ xfwm4_LDADD =								\
 	$(RENDER_LIBS)							\
 	$(XINERAMA_LIBS)						\
 	$(MATH_LIBS)
+	
+xfwm4_wayland_SOURCES = \
+$(top_builddir)/protocol/xfway-shell-client-protocol.c \
+$(top_builddir)/protocol/xfway-shell-client-protocol.h \
+$(top_builddir)/protocol/xfway-shell-server-protocol.h \
+$(top_builddir)/protocol/window-switcher-unstable-v1-server-protocol.c \
+$(top_builddir)/protocol/window-switcher-unstable-v1-server-protocol.h \
+$(top_builddir)/util/signal.c \
+$(top_builddir)/util/signal.h \
+$(top_builddir)/protocol/wlr-foreign-toplevel-management-unstable-v1-protocol.c \
+$(top_builddir)/wlr-foreign-toplevel-management-unstable-v1-protocol.h \
+wlr_foreign_toplevel_management_v1.c \
+wlr_foreign_toplevel_management_v1.h \
+$(top_builddir)/protocol/wlr-layer-shell-unstable-v1-protocol.c \
+$(top_builddir)/protocol/wlr-layer-shell-unstable-v1-protocol.h \
+wlr_layer_shell_v1.c \
+wlr_layer_shell_v1.h \
+$(top_builddir)/protocol/xdg-shell.c \
+$(top_builddir)/protocol/xdg-shell.h \
+os-compatibility.c \
+os-compatibility.h \
+$(top_builddir)/util/helpers.h \
+xfway.h \
+window-switcher.c \
+shell.c \
+shell.h \
+server.h \
+main-wayland.c
+
+xfwm4_wayland_CFLAGS = \
+$(WAYLAND_SERVER_CFLAGS) \
+$(LIBWESTON_CFLAGS) \
+$(LIBWESTON_DESKTOP_CFLAGS) \
+$(LIBINPUT_CFLAGS) \
+$(XKBCOMMON_CFLAGS) \
+$(EGL_CFLAGS) \
+$(EVDEV_CFLAGS) \
+$(GTK_CFLAGS) \
+$(LIBXFCONF_CFLAGS)
+
+xfwm4_wayland_LDADD = \
+$(WAYLAND_SERVER_LIBS) \
+$(LIBWESTON_LIBS) \
+$(LIBWESTON_DESKTOP_LIBS) \
+$(LIBINPUT_LIBS) \
+$(XKBCOMMON_LIBS) \
+$(EGL_LIBS) \
+$(EVDEV_LIBS) \
+$(PIXMAN_LIBS) \
+$(GTK_LIBS) \
+$(LIBXFCONF_LIBS)
 	
 xfwm4_wayland_shell_SOURCES =								\
 	client.c							\
@@ -240,7 +295,7 @@ xfwm4_wayland_shell_LDADD =								\
 	$(MATH_LIBS)
 
 AM_CPPFLAGS = 								\
-	-I${top_srcdir} 						\
+	-I${top_builddir} 						\
 	$(PLATFORM_CPPFLAGS)
 
 EXTRA_DIST = 								\

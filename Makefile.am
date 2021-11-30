@@ -2,6 +2,10 @@
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
+AM_CPPFLAGS = 					\
+	-DBINDIR='"$(bindir)"'			\
+	-DLIBEXECDIR='"$(libexecdir)"'	
+
 EXTRA_DIST =								\
 	example.gtkrc-2.0						\
 	intltool-extract.in						\
@@ -38,7 +42,9 @@ BUILT_SOURCES =								\
 	protocol/wlr-foreign-toplevel-management-unstable-v1-protocol.c		\
 	protocol/wlr-layer-shell-unstable-v1-protocol.h	\
 	protocol/wlr-layer-shell-unstable-v1-client-protocol.h	\
-	protocol/wlr-layer-shell-unstable-v1-protocol.c
+	protocol/wlr-layer-shell-unstable-v1-protocol.c \
+	protocol/xdg-shell.c \
+	protocol/xdg-shell.h
 
 distclean-local:
 	rm -rf *.cache

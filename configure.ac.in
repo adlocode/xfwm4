@@ -343,6 +343,7 @@ AC_DEFINE_UNQUOTED([REVISION], "$REVISION", [git id])
 AC_SUBST([REVISION])
 
 
+
 AC_CONFIG_FILES([
 Makefile
 defaults/Makefile
