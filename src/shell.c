@@ -1471,4 +1471,5 @@ void xfway_server_shell_init (xfwmDisplay *server, int argc, char *argv[])
   weston_compositor_add_key_binding (server->compositor, KEY_TAB, MODIFIER_ALT,
                                      tabwin_binding,
                                      shell);
+    
 }

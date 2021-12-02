@@ -163,6 +163,28 @@ setupLog (gboolean debug)
 }
 #endif /* DEBUG */
 
+static void shell_handle_tabwin (void *data, struct xfway_shell *shell)
+{
+  g_print ("tabwin");
+
+}
+
+static void shell_handle_tabwin_next (void *data, struct xfway_shell *shell)
+{
+
+}
+
+static void shell_handle_tabwin_destroy (void *data, struct xfway_shell *shell)
+{
+
+}
+
+struct xfway_shell_listener shell_impl = {
+  shell_handle_tabwin,
+  shell_handle_tabwin_next,
+  shell_handle_tabwin_destroy,
+};
+
 static void toplevel_handle_title(void *data,
 		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
 		const char *title)
@@ -270,10 +292,10 @@ void global_add (void               *data,
 
   if (strcmp (interface, "xfway_shell") == 0)
     {
-      //struct xfway_shell *shell = NULL;
-      //shell = wl_registry_bind (registry, name, &xfway_shell_interface, 1);
+      struct xfway_shell *shell = NULL;
+      shell = wl_registry_bind (registry, name, &xfway_shell_interface, 1);
 
-      //xfway_shell_add_listener (shell, &shell_impl, NULL);
+      xfway_shell_add_listener (shell, &shell_impl, NULL);
     }
   else if (strcmp(interface,
 			"zwlr_foreign_toplevel_manager_v1") == 0) {
