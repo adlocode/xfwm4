@@ -54,6 +54,8 @@
 #include "client.h"
 #include "hints.h"
 
+#include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+
 #define MODIFIER_MASK           (ShiftMask | \
                                  ControlMask | \
                                  AltMask | \
@@ -101,6 +103,8 @@ struct _ScreenInfo
     unsigned long client_serial;
     gint key_grabs;
     gint pointer_grabs;
+  
+    struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
 
     /* Theme pixmaps and other params, per screen */
     GdkRGBA title_colors[2];

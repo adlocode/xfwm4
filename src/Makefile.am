@@ -237,10 +237,17 @@ xfwm4_wayland_shell_SOURCES =								\
 	workspaces.h							\
 	xsync.c								\
 	xsync.h								\
-	xpm-color-table.h
+	xpm-color-table.h						\
+	$(top_srcdir)/protocol/xfway-shell-client-protocol.c \
+	$(top_srcdir)/protocol/xfway-shell-client-protocol.h \
+	$(top_srcdir)/protocol/wlr-foreign-toplevel-management-unstable-v1-protocol.c \
+	$(top_srcdir)/protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h \
+	$(top_srcdir)/util/libgwater-wayland.c 				\
+	$(top_srcdir)/util/libgwater-wayland.h
 
 xfwm4_wayland_shell_CFLAGS =								\
 	$(WAYLAND_SERVER_CFLAGS) \
+	$(WAYLAND_CLIENT_CFLAGS) \
 	$(LIBWESTON_CFLAGS) \
 	$(LIBWESTON_DESKTOP_CFLAGS) \
 	$(LIBINPUT_CFLAGS) \
@@ -269,6 +276,7 @@ xfwm4_wayland_shell_CFLAGS =								\
 
 xfwm4_wayland_shell_LDADD =								\
 	$(WAYLAND_SERVER_LIBS) \
+	$(WAYLAND_CLIENT_LIBS) \
 	$(LIBWESTON_LIBS) \
 	$(LIBWESTON_DESKTOP_LIBS) \
 	$(LIBINPUT_LIBS) \

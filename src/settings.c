@@ -751,7 +751,8 @@ loadSettings (ScreenInfo *screen_info)
     };
 
     TRACE ("entering");
-
+  
+  
     loadRcData (screen_info, rc);
     loadXfconfData (screen_info, rc);
     loadTheme (screen_info, rc);
@@ -918,6 +919,7 @@ loadSettings (ScreenInfo *screen_info)
     }
 
     freeRc (rc);
+    
     return TRUE;
 }
 

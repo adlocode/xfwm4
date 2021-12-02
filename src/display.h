@@ -61,6 +61,8 @@
 #endif /* COMPOSITE_MAJOR > 0 || COMPOSITE_MINOR >= 3 */
 #endif /* HAVE_COMPOSITOR */
 
+#include <wayland-client.h>
+
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <libxfce4ui/libxfce4ui.h>
@@ -287,6 +289,8 @@ struct _DisplayInfo
 {
     GdkDisplay *gdisplay;
     Display *dpy;
+  
+    struct wl_display *wayland_display;
 
     XfceSMClient *session;
     gboolean quit;

@@ -171,19 +171,23 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     PangoLayout *layout;
     long desktop_visible;
     int i, j;
+  g_print ("enter screen init");
 
-    g_return_val_if_fail (display_info, NULL);
-    g_return_val_if_fail (GDK_IS_SCREEN (gscr), NULL);
+    //g_return_val_if_fail (display_info, NULL);
+    //g_return_val_if_fail (GDK_IS_SCREEN (gscr), NULL);
     TRACE ("entering");
 
     screen_info = g_new0 (ScreenInfo, 1);
     screen_info->params = g_new0 (XfwmParams, 1);
+  if (screen_info != NULL)
+    g_print ("screen\n");  
 
     screen_info->display_info = display_info;
     screen_info->gscr = gscr;
     desktop_visible = 0;
     layout = NULL;
-
+    if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
     /* Create a GTK window so that we are just like any other GTK application */
     screen_info->gtk_win = gtk_window_new (GTK_WINDOW_POPUP);
     gtk_window_set_screen (GTK_WINDOW (screen_info->gtk_win), gscr);
@@ -202,6 +206,7 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     pango_layout_get_pixel_extents (layout, NULL, NULL);
     g_object_unref (G_OBJECT (layout));
 
+
     screen_info->xscreen = gdk_x11_screen_get_xscreen (gscr);
     screen_info->xroot = gdk_x11_window_get_xid (gdk_screen_get_root_window (gscr));
     screen_info->screen = gdk_x11_screen_get_screen_number (gscr);
@@ -210,6 +215,8 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->visual = DefaultVisual (display_info->dpy, screen_info->screen);
     screen_info->shape_win = (Window) None;
     myScreenComputeSize (screen_info);
+  
+
 
     screen_info->xfwm4_win = gdk_x11_window_get_xid (gtk_widget_get_window (screen_info->gtk_win));
     if (!myScreenSetWMAtom (screen_info, replace_wm))
@@ -226,7 +233,7 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
         g_free (screen_info);
         return NULL;
     }
-    gdk_window_set_user_data (event_win, screen_info->gtk_win);
+    gdk_window_set_user_data (event_win, screen_info->gtk_win);}
 
     screen_info->current_ws = 0;
     screen_info->previous_ws = 0;
@@ -253,7 +260,9 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->key_grabs = 0;
     screen_info->pointer_grabs = 0;
 
-    getHint (display_info, screen_info->xroot, NET_SHOWING_DESKTOP, &desktop_visible);
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
+  getHint (display_info, screen_info->xroot, NET_SHOWING_DESKTOP, &desktop_visible);
     screen_info->show_desktop = (desktop_visible != 0);
 
     /* Create the side windows to detect edge movement */
@@ -332,10 +341,10 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
         xfwmPixmapInit (screen_info, &screen_info->top[i][ACTIVE]);
         xfwmPixmapInit (screen_info, &screen_info->top[i][INACTIVE]);
     }
-
+   
     screen_info->monitors_index = NULL;
     myScreenInvalidateMonitorCache (screen_info);
-    myScreenRebuildMonitorIndex (screen_info);
+    myScreenRebuildMonitorIndex (screen_info); }
 
     return (screen_info);
 }

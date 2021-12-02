@@ -18,6 +18,7 @@
 
         oroborus - (c) 2001 Ken Lynch
         xfwm4    - (c) 2002-2011 Olivier Fourdan
+        xfwm4-wayland - (c) 2021 adlo
 
  */
 
@@ -30,6 +31,7 @@
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkwayland.h>
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4ui/libxfce4ui.h>
@@ -48,6 +50,9 @@
 #include <string.h>
 
 #include <wayland-client.h>
+#include <protocol/xfway-shell-client-protocol.h>
+#include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+#include "../util/libgwater-wayland.h"
 
 #include "display.h"
 #include "screen.h"
@@ -95,6 +100,17 @@ xfwm4_error_quark (void)
   return g_quark_from_static_string ("xfwm4-error-quark");
 }
 #endif /* HAVE_COMPOSITOR */
+
+struct wl_display *wayland_display = NULL;
+static struct wl_registry *registry = NULL;
+
+enum toplevel_state_field {
+	TOPLEVEL_STATE_MAXIMIZED = (1 << 0),
+	TOPLEVEL_STATE_MINIMIZED = (1 << 1),
+	TOPLEVEL_STATE_ACTIVATED = (1 << 2),
+	TOPLEVEL_STATE_FULLSCREEN = (1 << 3),
+	TOPLEVEL_STATE_INVALID = (1 << 4),
+};
 
 #ifdef DEBUG
 static gboolean
@@ -146,6 +162,142 @@ setupLog (gboolean debug)
     return TRUE;
 }
 #endif /* DEBUG */
+
+static void toplevel_handle_title(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
+		const char *title)
+{
+  Client *c = data;
+  if (c->name)
+    g_free (c->name);
+  c->name = g_strdup (title);
+  g_print (c->name);
+}
+
+static void toplevel_handle_app_id(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
+		const char *app_id)
+{
+
+}
+
+static uint32_t array_to_state(struct wl_array *array) {
+	uint32_t state = 0;
+	uint32_t *entry;
+	wl_array_for_each(entry, array) {
+		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_MAXIMIZED)
+			state |= TOPLEVEL_STATE_MAXIMIZED;
+		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_MINIMIZED)
+			state |= TOPLEVEL_STATE_MINIMIZED;
+		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_ACTIVATED)
+			state |= TOPLEVEL_STATE_ACTIVATED;
+		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_FULLSCREEN)
+			state |= TOPLEVEL_STATE_FULLSCREEN;
+	}
+
+	return state;
+}
+
+static void toplevel_handle_state(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
+		struct wl_array *state) {
+	Client *c = data;
+	uint32_t s = array_to_state(state);
+
+  //if (s & TOPLEVEL_STATE_ACTIVATED)
+    //focus = c;
+}
+
+static void toplevel_handle_done(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+{
+
+}
+
+static void toplevel_handle_closed(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+{
+  Client *c = data;
+
+  //if (c->name)
+    //g_free (c->name);
+
+  clientUnframeWayland (c, FALSE);
+}
+
+static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_impl = {
+	.title = toplevel_handle_title,
+	.app_id = toplevel_handle_app_id,
+	.output_enter = NULL,
+	.output_leave = NULL,
+	.state = toplevel_handle_state,
+	.done = toplevel_handle_done,
+	.closed = toplevel_handle_closed,
+};
+
+static void toplevel_manager_handle_toplevel(void *data,
+		struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+{
+  ScreenInfo *screen_info = data;
+  Client *c;
+  
+  g_print ("window opened");
+
+  c = clientFrameWayland (screen_info, zwlr_toplevel, FALSE);
+
+  zwlr_foreign_toplevel_handle_v1_add_listener (zwlr_toplevel, &toplevel_impl,
+                                                c);
+}
+
+static void toplevel_manager_handle_finished(void *data,
+		struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager) {
+	zwlr_foreign_toplevel_manager_v1_destroy(toplevel_manager);
+}
+
+static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_impl = {
+	.toplevel = toplevel_manager_handle_toplevel,
+	.finished = toplevel_manager_handle_finished,
+};
+
+void global_add (void               *data,
+                 struct wl_registry *registry,
+                 uint32_t            name,
+                 const char         *interface,
+                 uint32_t            version)
+{
+  ScreenInfo *screen_info = data;
+
+  if (strcmp (interface, "xfway_shell") == 0)
+    {
+      //struct xfway_shell *shell = NULL;
+      //shell = wl_registry_bind (registry, name, &xfway_shell_interface, 1);
+
+      //xfway_shell_add_listener (shell, &shell_impl, NULL);
+    }
+  else if (strcmp(interface,
+			"zwlr_foreign_toplevel_manager_v1") == 0) {
+		screen_info->toplevel_manager = wl_registry_bind(registry, name,
+				&zwlr_foreign_toplevel_manager_v1_interface,
+				2);
+
+    zwlr_foreign_toplevel_manager_v1_add_listener(screen_info->toplevel_manager,
+				&toplevel_manager_impl, screen_info);
+        g_print ("foreign-toplevel\n");
+      }
+}
+void global_remove (void               *data,
+                    struct wl_registry *registry,
+                    uint32_t            name)
+{
+
+}
+
+struct wl_registry_listener registry_listener =
+{
+  .global = global_add,
+  .global_remove = global_remove
+};
 
 static void
 handleSignal (int sig)
@@ -530,6 +682,7 @@ initialize (gboolean replace_wm)
 
     DBG ("xfwm4 starting, using GTK+-%d.%d.%d", gtk_major_version,
          gtk_minor_version, gtk_micro_version);
+    g_print ("initialize\n");
 
     ensure_basedir_spec ();
 
@@ -543,13 +696,13 @@ initialize (gboolean replace_wm)
     display_info->enable_compositor = FALSE;
 #endif /* HAVE_COMPOSITOR */
 
-    initModifiers (display_info->dpy);
+    //initModifiers (display_info->dpy);
 
-    setupHandler (TRUE);
+    //setupHandler (TRUE);
 
     //nscreens = ScreenCount (display_info->dpy);
-    // nscreens = 1;
-    default_screen = DefaultScreen (display_info->dpy);
+    nscreens = 1;
+    //default_screen = DefaultScreen (display_info->dpy);
     for(i = 0; i < nscreens; i++)
     {
         ScreenInfo *screen_info;
@@ -587,24 +740,33 @@ initialize (gboolean replace_wm)
         }*/
         screen_info = myScreenInit (display_info, gscr, MAIN_EVENT_MASK, replace_wm);
 
-        if (!screen_info)
-        {
-            continue;
+         g_print ("mid initialize\n");
+          if (!screen_info)
+        {            
+          continue;
         }
 
-        if (!initSettings (screen_info))
+        /*if (!initSettings (screen_info))
         {
-            return -2;
-        }
+          g_print ("no s\n");  
+          return -2;
+        }*/
+          
+         registry = wl_display_get_registry (wayland_display);
+
+    wl_registry_add_listener (registry, &registry_listener, screen_info);
+          
+          if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
 #ifdef HAVE_COMPOSITOR
         if (display_info->enable_compositor)
         {
             init_compositor_screen (screen_info);
-        }
+        }}
 #endif /* HAVE_COMPOSITOR */
-        sn_init_display (screen_info);
+        //sn_init_display (screen_info);
         myDisplayAddScreen (display_info, screen_info);
-        screen_info->current_ws = getNetCurrentDesktop (display_info, screen_info->xroot);
+        /*screen_info->current_ws = getNetCurrentDesktop (display_info, screen_info->xroot);
         setUTF8StringHint (display_info, screen_info->xfwm4_win, NET_WM_NAME, "Xfwm4");
         setNetSupportedHint (display_info, screen_info->xroot, screen_info->xfwm4_win);
         setNetDesktopInfo (display_info, screen_info->xroot, screen_info->current_ws,
@@ -617,17 +779,20 @@ initialize (gboolean replace_wm)
 
         initPerScreenCallbacks (screen_info);
 
-        XDefineCursor (display_info->dpy, screen_info->xroot, myDisplayGetCursorRoot(display_info));
-    }
+        XDefineCursor (display_info->dpy, screen_info->xroot, myDisplayGetCursorRoot(display_info));*/
+    
+        }
 
     /* No screen to manage, give up */
     if (!display_info->nb_screens)
-    {
-        return -1;
+    {        
+      return -1;
     }
     display_info->xfilter = eventFilterInit (display_info->devices, (gpointer) display_info);
     eventFilterPush (display_info->xfilter, xfwm4_event_filter, (gpointer) display_info);
-    initPerDisplayCallbacks (display_info);
+    //initPerDisplayCallbacks (display_info);
+      
+    g_print ("exit initialize\n");
 
     return sessionStart (display_info);
 }
@@ -659,6 +824,7 @@ main (int argc, char **argv)
     int status;
     GOptionContext *context;
     GError *error = NULL;
+    GWaterWaylandSource *source;
 #ifdef DEBUG
     gboolean debug = FALSE;
 #endif /* DEBUG */
@@ -743,6 +909,8 @@ main (int argc, char **argv)
 #endif /* DEBUG */
     DBG ("xfwm4 starting");
     g_print ("%s", "xfwm4 starting");
+  
+    wayland_display = wl_display_connect (NULL);
 
     gtk_init (&argc, &argv);
 
@@ -754,6 +922,8 @@ main (int argc, char **argv)
     init_pango_cache ();
 
     status = initialize (replace_wm);
+   
+
     /*
        status  < 0   =>   Error, cancel execution
        status == 0   =>   Run w/out session manager
@@ -772,6 +942,14 @@ main (int argc, char **argv)
         case 0:
         case 1:
             /* enter GTK main loop */
+            g_print ("gtk\n");
+            wl_display_roundtrip (wayland_display);
+            wl_display_roundtrip (wayland_display);
+
+            source = g_water_wayland_source_new_for_display (NULL, wayland_display);
+      
+      //GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+      //gtk_widget_show (window);
             gtk_main ();
             break;
         default:

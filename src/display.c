@@ -33,6 +33,7 @@
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkwayland.h>
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 #ifdef HAVE_RENDER
@@ -205,14 +206,18 @@ myDisplayInit (GdkDisplay *gdisplay)
     {
       default_display = display;
     }
+  g_print ("enter display init\n");
 
     display->gdisplay = gdisplay;
     display->dpy = (Display *) gdk_x11_display_get_xdisplay (gdisplay);
 
     display->session = NULL;
     display->quit = FALSE;
-    display->reload = FALSE;
+    display->reload = FALSE;  g_print ("mid display init\n");
 
+    if (GDK_IS_X11_DISPLAY (gdisplay))
+    {
+    
     /* Initialize internal atoms */
     if (!myDisplayInitAtoms (display))
     {
@@ -329,9 +334,11 @@ myDisplayInit (GdkDisplay *gdisplay)
     display->have_xres = FALSE;
 #endif /* HAVE_XRES */
 
+
     myDisplayCreateCursor (display);
 
     myDisplayCreateTimestampWin (display);
+              }
 
     display->xfilter = NULL;
     display->screens = NULL;
@@ -342,7 +349,9 @@ myDisplayInit (GdkDisplay *gdisplay)
     display->nb_screens = 0;
     display->current_time = CurrentTime;
 
-    hostnametmp = g_new0 (gchar, (size_t) MAX_HOSTNAME_LENGTH + 1);
+  if (GDK_IS_X11_DISPLAY (gdisplay))
+    {
+  hostnametmp = g_new0 (gchar, (size_t) MAX_HOSTNAME_LENGTH + 1);
     if (gethostname ((char *) hostnametmp, MAX_HOSTNAME_LENGTH))
     {
         g_warning ("The display's hostname could not be determined.");
@@ -354,6 +363,9 @@ myDisplayInit (GdkDisplay *gdisplay)
     g_free (hostnametmp);
 
     compositorInitDisplay (display);
+    }
+
+  g_print ("exit display init\n");
 
     return display;
 }

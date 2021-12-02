@@ -38,6 +38,9 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/shape.h>
 
+#include <wayland-client.h>
+#include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <sys/time.h>
@@ -279,6 +282,7 @@ struct _Client
     ScreenInfo *screen_info;
 
     Window window;
+    struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle;
     Window frame;
     Window transient_for;
     Window user_time_win;
@@ -406,6 +410,11 @@ Client                  *clientFrame                            (DisplayInfo *,
                                                                  Window,
                                                                  gboolean);
 void                     clientUnframe                          (Client *,
+                                                                 gboolean);
+Client                   *clientFrameWayland                    (ScreenInfo *,
+                                                                 struct zwlr_foreign_toplevel_handle_v1 *, 
+                                                                 gboolean);
+void                     clientUnframeWayland                   (Client *, 
                                                                  gboolean);
 void                     clientFrameAll                         (ScreenInfo *);
 void                     clientUnframeAll                       (ScreenInfo *);

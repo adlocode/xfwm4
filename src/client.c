@@ -1615,6 +1615,114 @@ clientRestoreSizePos (Client *c)
 }
 
 Client *
+clientFrameWayland (ScreenInfo *screen_info, struct zwlr_foreign_toplevel_handle_v1 *foreign_toplevel, gboolean recapture)
+{
+    DisplayInfo *display_info;
+    Window *w = None;
+    XWindowAttributes attr;
+    XSetWindowAttributes attributes;
+    Client *c = NULL;
+    gboolean shaped;
+    gchar *wm_name;
+    unsigned long valuemask;
+    int i;
+  
+    display_info = screen_info->display_info;
+  
+  g_print ("enter client frame");
+
+    //myDisplayGrabServer (display_info);
+    //myDisplayErrorTrapPush (display_info);
+  
+  g_print ("mid client frame");
+
+    c = g_new0 (Client, 1);
+    if (!c)
+    {
+      g_print ("cannot create clent\n");  
+      TRACE ("cannot allocate memory for the window structure");
+        goto out;
+    }
+  
+  g_print ("created client");
+
+    c->window = w;
+    c->toplevel_handle = foreign_toplevel;
+    c->screen_info = screen_info;
+    c->serial = screen_info->client_serial++;
+
+    /* Termination dialog */
+    c->dialog_pid = 0;
+    c->dialog_fd = -1;
+
+    /*getWindowName (display_info, c->window, &wm_name);
+    getWindowHostname (display_info, c->window, &c->hostname);
+    c->name = clientCreateTitleName (c, wm_name, c->hostname);
+    g_free (wm_name);
+
+    getTransientFor (display_info, screen_info->xroot, c->window, &c->transient_for);
+    XChangeSaveSet(display_info->dpy, c->window, SetModeInsert);*/
+
+    /* Initialize structure */
+    c->size = NULL;
+    c->flags = 0L;
+    c->wm_flags = 0L;
+    c->xfwm_flags = XFWM_FLAG_INITIAL_VALUES;
+    c->x = attr.x;
+    c->y = attr.y;
+    c->width = attr.width;
+    c->height = attr.height;
+
+    c->applied_geometry.x = c->x;
+    c->applied_geometry.y = c->y;
+    c->applied_geometry.width = c->width;
+    c->applied_geometry.height = c->height;
+
+#ifdef HAVE_LIBSTARTUP_NOTIFICATION
+    c->startup_id = NULL;
+#endif /* HAVE_LIBSTARTUP_NOTIFICATION */
+  
+  clientAddToList (c);
+
+out:
+
+    return c;
+}
+
+void
+clientUnframeWayland (Client *c, gboolean remap)
+{
+    ScreenInfo *screen_info;
+    DisplayInfo *display_info;
+    XEvent ev;
+    int i;
+    gboolean reparented;
+  
+  g_print ("client unframe");
+
+    TRACE ("client \"%s\" (0x%lx) [%s]",
+            c->name, c->window, remap ? "remap" : "no remap");
+
+    g_return_if_fail (c != NULL);
+
+    screen_info = c->screen_info;
+    display_info = screen_info->display_info;
+
+    clientRemoveFromList (c);
+    compositorSetClient (display_info, c->frame, NULL);
+
+    //myDisplayGrabServer (display_info);
+    //myDisplayErrorTrapPush (display_info);
+
+
+    //myDisplayErrorTrapPopIgnored (display_info);
+    //myDisplayUngrabServer (display_info);
+  
+    clientFree (c);
+    g_print ("client unframe end");
+}
+
+Client *
 clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
 {
     ScreenInfo *screen_info;
@@ -1625,6 +1733,8 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     gchar *wm_name;
     unsigned long valuemask;
     int i;
+  
+  g_print ("enter client frame");
 
     g_return_val_if_fail (w != None, NULL);
     g_return_val_if_fail (display_info != NULL, NULL);
@@ -1652,6 +1762,8 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
         compositorAddWindow (display_info, w, NULL);
         goto out;
     }
+  
+  g_print ("mid client frame");
 
 #ifdef ENABLE_KDE_SYSTRAY_PROXY
     if (checkKdeSystrayWindow (display_info, w))
@@ -1675,9 +1787,12 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c = g_new0 (Client, 1);
     if (!c)
     {
-        TRACE ("cannot allocate memory for the window structure");
+      g_print ("cannot create clent\n");  
+      TRACE ("cannot allocate memory for the window structure");
         goto out;
     }
+  
+  g_print ("created client");
 
     c->window = w;
     c->screen_info = screen_info;
@@ -2073,6 +2188,8 @@ clientUnframe (Client *c, gboolean remap)
     XEvent ev;
     int i;
     gboolean reparented;
+  
+  g_print ("client unframe");
 
     TRACE ("client \"%s\" (0x%lx) [%s]",
             c->name, c->window, remap ? "remap" : "no remap");

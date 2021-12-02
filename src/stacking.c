@@ -28,6 +28,7 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <glib.h>
+#include <gdk/gdkx.h>
 #include <libxfce4util/libxfce4util.h>
 
 #include "display.h"
@@ -612,7 +613,10 @@ clientAddToList (Client * c)
     screen_info->windows = g_list_append (screen_info->windows, c);
     screen_info->windows_stack = g_list_append (screen_info->windows_stack, c);
 
-    clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST], screen_info->windows);
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
+  clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST], screen_info->windows);
+    }
 
     FLAG_SET (c->xfwm_flags, XFWM_FLAG_MANAGED);
 }
@@ -651,8 +655,11 @@ clientRemoveFromList (Client * c)
     screen_info->windows = g_list_remove (screen_info->windows, c);
     screen_info->windows_stack = g_list_remove (screen_info->windows_stack, c);
 
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
     clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST], screen_info->windows);
     clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST_STACKING], screen_info->windows_stack);
+    }
 
     FLAG_UNSET (c->xfwm_flags, XFWM_FLAG_MANAGED);
 }

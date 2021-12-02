@@ -403,7 +403,6 @@ static void layer_surface_role_commit(struct weston_surface *weston_surface,
 	}
 
 	/*if (weston_view_is_mapped (surface->view) && !surface->configured) {
-		wl_resource_post_error(surface->resource,
 			ZWLR_LAYER_SHELL_V1_ERROR_ALREADY_CONSTRUCTED,
 			"layer_surface has never been configured");
 		return;
