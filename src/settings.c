@@ -388,9 +388,14 @@ loadTheme (ScreenInfo *screen_info, Settings *rc)
     gchar *theme;
     const gchar *font;
     guint i, j;
+  
+    if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
 
     widget = myScreenGetGtkWidget (screen_info);
     display_info = screen_info->display_info;
+  
+  
 
     i = 0;
 
@@ -550,8 +555,10 @@ loadTheme (ScreenInfo *screen_info, Settings *rc)
         getIntValue ("title_vertical_offset_inactive", rc);
     screen_info->params->title_horizontal_offset =
         getIntValue ("title_horizontal_offset", rc);
+    
 
     g_free (theme);
+    }
 }
 
 static void
@@ -636,6 +643,7 @@ loadKeyBindings (ScreenInfo *screen_info)
 gboolean
 loadSettings (ScreenInfo *screen_info)
 {
+  
     const gchar *value;
     Settings rc[] = {
         /* Do not change the order of the following parameters */
@@ -751,12 +759,14 @@ loadSettings (ScreenInfo *screen_info)
     };
 
     TRACE ("entering");
-  
+  g_print ("load settings");
   
     loadRcData (screen_info, rc);
-    loadXfconfData (screen_info, rc);
-    loadTheme (screen_info, rc);
-    update_grabs (screen_info);
+    //loadXfconfData (screen_info, rc);
+    //loadTheme (screen_info, rc);return TRUE;
+    //update_grabs (screen_info);
+  
+  g_print ("ls");
 
     loadKeyBindings (screen_info);
 
@@ -906,6 +916,9 @@ loadSettings (ScreenInfo *screen_info)
     {
         screen_info->params->double_click_action = DOUBLE_CLICK_ACTION_NONE;
     }
+  
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
 
     if (screen_info->workspace_count == 0)
     {
@@ -916,6 +929,7 @@ loadSettings (ScreenInfo *screen_info)
     if (value)
     {
         compositorSetVblankMode (screen_info, compositorParseVblankMode (value));
+    }
     }
 
     freeRc (rc);
@@ -1059,6 +1073,7 @@ initSettings (ScreenInfo *screen_info)
     if (!xfconf_init (NULL))
     {
         g_critical ("Xfconf could not be initialized");
+      g_print ("Xfconf could not be initialized");
         return FALSE;
     }
 
@@ -1080,11 +1095,17 @@ initSettings (ScreenInfo *screen_info)
                       G_CALLBACK (cb_shortcut_added), screen_info);
     g_signal_connect (screen_info->shortcuts_provider, "shortcut-removed",
                       G_CALLBACK (cb_shortcut_removed), screen_info);
+  
+  
 
     if (!loadSettings (screen_info))
     {
         return FALSE;
+      
     }
+  
+    if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
     if (getHint (display_info, screen_info->xroot, NET_NUMBER_OF_DESKTOPS, &val))
     {
         workspaceSetCount (screen_info, (guint) MAX (val, 1));
@@ -1102,6 +1123,12 @@ initSettings (ScreenInfo *screen_info)
 
     getDesktopLayout(display_info, screen_info->xroot, screen_info->workspace_count, &screen_info->desktop_layout);
     placeSidewalks (screen_info, screen_info->params->wrap_workspaces);
+    }
+  else
+    {
+      screen_info->workspace_names = NULL;
+        screen_info->workspace_names_items = 0;
+    }
 
     return TRUE;
 }
@@ -1461,6 +1488,10 @@ static gboolean
 keymap_reload (gpointer data)
 {
     ScreenInfo *screen_info = data;
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
+
+    
 
     g_return_val_if_fail (screen_info != NULL, FALSE);
     TRACE ("entering");
@@ -1481,6 +1512,7 @@ keymap_reload (gpointer data)
 
     /* We're done */
     keymap_timeout = 0;
+    }
 
     return FALSE;
 }
@@ -1488,7 +1520,8 @@ keymap_reload (gpointer data)
 static void
 cb_keys_changed (GdkKeymap *keymap, ScreenInfo *screen_info)
 {
-    if (keymap_timeout)
+    
+   if (keymap_timeout)
     {
         g_source_remove (keymap_timeout);
     }
@@ -1523,7 +1556,7 @@ cb_shortcut_added (XfceShortcutsProvider *provider, const gchar *shortcut,
     {
         if (g_str_equal (screen_info->params->keys[i].internal_name, sc->command))
         {
-            parseKeyString (dpy, &screen_info->params->keys[i], shortcut);
+            parseKeyString (screen_info->display_info, &screen_info->params->keys[i], shortcut);
 
             myScreenUngrabKeys (screen_info);
             myScreenGrabKeys (screen_info);
@@ -1548,7 +1581,7 @@ cb_shortcut_removed (XfceShortcutsProvider *provider, const gchar *shortcut,
 
     dpy = myScreenGetXDisplay (screen_info);
 
-    parseKeyString (dpy, &key, shortcut);
+    parseKeyString (screen_info->display_info, &key, shortcut);
 
     for (i = 0; i < KEY_COUNT; ++i)
     {
@@ -1577,7 +1610,7 @@ parseShortcut (ScreenInfo *screen_info, int id, const gchar *name,
 
     dpy = myScreenGetXDisplay (screen_info);
     shortcut = getShortcut (name, shortcuts);
-    parseKeyString (dpy, &screen_info->params->keys[id], shortcut);
+    parseKeyString (screen_info->display_info, &screen_info->params->keys[id], shortcut);
 
     screen_info->params->keys[id].internal_name = g_strdup (name);
 }
@@ -1599,6 +1632,8 @@ getShortcut (const gchar *name, GList *shortcuts)
             break;
         }
     }
+  
+  g_print ("%s%s", result, " ");
 
     return result;
 }

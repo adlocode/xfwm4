@@ -291,6 +291,7 @@ struct _DisplayInfo
     Display *dpy;
   
     struct wl_display *wayland_display;
+    struct wl_seat *seat;
 
     XfceSMClient *session;
     gboolean quit;

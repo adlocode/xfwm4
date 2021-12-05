@@ -29,6 +29,7 @@
 #endif
 
 #include "device.h"
+#include "display.h"
 
 #include <X11/keysym.h>
 
@@ -49,7 +50,7 @@ extern unsigned int HyperMask;
 
 gboolean                 getModifierMap                         (const char *,
                                                                  guint *);
-void                     parseKeyString                         (Display *,
+void                     parseKeyString                         (DisplayInfo *,
                                                                  MyKey *,
                                                                  const char *);
 gboolean                 grabKey                                (XfwmDevices *,

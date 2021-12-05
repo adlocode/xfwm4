@@ -29,10 +29,12 @@
 #include <X11/Xlib.h>
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <libxfce4util/libxfce4util.h>
+#include <xkbcommon/xkbcommon.h>
 #include "keyboard.h"
 
 #define MODIFIER_MASK (GDK_SHIFT_MASK | \
@@ -69,12 +71,21 @@ unsigned int HyperMask;
     KeyReleaseMask
 
 static KeyCode
-getKeycode (Display *dpy, const char *str)
+getKeycode (DisplayInfo *display_info, const char *str)
 {
-    GdkModifierType keysym;
+  Display *dpy = display_info->dpy;  
+  GdkModifierType keysym;
 
-    gtk_accelerator_parse (str, &keysym, NULL);
-    return XKeysymToKeycode (dpy, keysym);
+  gtk_accelerator_parse (str, &keysym, NULL);
+  g_print ("%d%s", keysym, "\n");
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+  {
+  return XKeysymToKeycode (dpy, keysym);
+  }
+  else
+    {
+      return 0;
+    }
 }
 
 static gboolean
@@ -120,9 +131,10 @@ getModifierMap (const char *str, guint *map)
 }
 
 void
-parseKeyString (Display * dpy, MyKey * key, const char *str)
+parseKeyString (DisplayInfo *display_info, MyKey * key, const char *str)
 {
-    g_return_if_fail (key != NULL);
+  Display *dpy = display_info->dpy;  
+  g_return_if_fail (key != NULL);
 
     TRACE ("key string=%s", str);
 
@@ -145,8 +157,9 @@ parseKeyString (Display * dpy, MyKey * key, const char *str)
         key->modifier = 0;
         return;
     }
-    key->keycode = getKeycode (dpy, str);
 
+    key->keycode = getKeycode (display_info, str);
+  
     TRACE ("keycode = 0x%x, modifier = 0x%x", key->keycode, key->modifier);
 }
 

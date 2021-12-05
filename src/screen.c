@@ -589,11 +589,14 @@ void
 myScreenUngrabKeys (ScreenInfo *screen_info)
 {
     Display *dpy;
+    if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
 
     g_return_if_fail (screen_info != NULL);
 
     dpy = myScreenGetXDisplay (screen_info);
     ungrabKeys (screen_info->display_info->devices, dpy, screen_info->xroot);
+    }
 }
 
 gint

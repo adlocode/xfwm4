@@ -282,6 +282,24 @@ static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_i
 	.finished = toplevel_manager_handle_finished,
 };
 
+static void
+wl_seat_capabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities)
+{
+       /* TODO */
+  g_print ("\n***seat capabilities***\n");
+}
+
+static void
+wl_seat_name(void *data, struct wl_seat *wl_seat, const char *name)
+{
+       fprintf(stderr, "seat name: %s\n", name);
+}
+
+static const struct wl_seat_listener wl_seat_listener = {
+       .capabilities = wl_seat_capabilities,
+       .name = wl_seat_name,
+};
+
 void global_add (void               *data,
                  struct wl_registry *registry,
                  uint32_t            name,
@@ -289,6 +307,7 @@ void global_add (void               *data,
                  uint32_t            version)
 {
   ScreenInfo *screen_info = data;
+  DisplayInfo *display_info = screen_info->display_info;
 
   if (strcmp (interface, "xfway_shell") == 0)
     {
@@ -306,6 +325,15 @@ void global_add (void               *data,
     zwlr_foreign_toplevel_manager_v1_add_listener(screen_info->toplevel_manager,
 				&toplevel_manager_impl, screen_info);
         g_print ("foreign-toplevel\n");
+      }
+  else if (strcmp(interface,
+			"wl_seat") == 0) {
+      display_info->seat = wl_registry_bind(registry, name,
+				&wl_seat_interface,
+				2);
+        wl_seat_add_listener(display_info->seat,
+				&wl_seat_listener, screen_info);
+        g_print ("\n***seat***\n");
       }
 }
 void global_remove (void               *data,
@@ -768,11 +796,11 @@ initialize (gboolean replace_wm)
           continue;
         }
 
-        /*if (!initSettings (screen_info))
+        if (!initSettings (screen_info))
         {
           g_print ("no s\n");  
           return -2;
-        }*/
+        }
           
          registry = wl_display_get_registry (wayland_display);
 
