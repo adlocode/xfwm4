@@ -40,6 +40,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -283,10 +284,61 @@ static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_i
 };
 
 static void
+wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard,
+               uint32_t format, int32_t fd, uint32_t size)
+{
+       DisplayInfo *client_state = data;
+  g_print ("keymap");
+       //assert(format == WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1);       
+
+       char *map_shm = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+       if (map_shm == MAP_FAILED)
+    {
+      return;
+    }
+       g_print ("keymap2");
+
+       struct xkb_keymap *xkb_keymap = xkb_keymap_new_from_string(
+                       client_state->xkb_context, map_shm,
+                       XKB_KEYMAP_FORMAT_TEXT_V1, XKB_KEYMAP_COMPILE_NO_FLAGS);
+       munmap(map_shm, size);
+       close(fd);
+  
+  g_print ("keymap3");
+
+       struct xkb_state *xkb_state = xkb_state_new(xkb_keymap);
+       xkb_keymap_unref(client_state->xkb_keymap);
+       xkb_state_unref(client_state->xkb_state);
+       client_state->xkb_keymap = xkb_keymap;
+       client_state->xkb_state = xkb_state;
+}
+
+static const struct wl_keyboard_listener wl_keyboard_listener = {
+       .keymap = wl_keyboard_keymap,
+       .enter = NULL,
+       .leave = NULL,
+       .key = NULL,
+       .modifiers = NULL,
+       .repeat_info = NULL,
+};
+
+static void
 wl_seat_capabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities)
 {
-       /* TODO */
+  ScreenInfo *screen_info = data;
+  DisplayInfo *display_info = screen_info->display_info;
   g_print ("\n***seat capabilities***\n");
+  
+  bool have_keyboard = capabilities & WL_SEAT_CAPABILITY_KEYBOARD;
+
+       if (have_keyboard && display_info->wl_keyboard == NULL) {
+               display_info->wl_keyboard = wl_seat_get_keyboard(display_info->wl_seat);
+               wl_keyboard_add_listener(display_info->wl_keyboard,
+                               &wl_keyboard_listener, display_info);
+       } else if (!have_keyboard && display_info->wl_keyboard != NULL) {
+               wl_keyboard_release(display_info->wl_keyboard);
+               display_info->wl_keyboard = NULL;
+       }
 }
 
 static void
@@ -328,10 +380,10 @@ void global_add (void               *data,
       }
   else if (strcmp(interface,
 			"wl_seat") == 0) {
-      display_info->seat = wl_registry_bind(registry, name,
+      display_info->wl_seat = wl_registry_bind(registry, name,
 				&wl_seat_interface,
 				2);
-        wl_seat_add_listener(display_info->seat,
+        wl_seat_add_listener(display_info->wl_seat,
 				&wl_seat_listener, screen_info);
         g_print ("\n***seat***\n");
       }

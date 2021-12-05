@@ -62,6 +62,7 @@
 #endif /* HAVE_COMPOSITOR */
 
 #include <wayland-client.h>
+#include <xkbcommon/xkbcommon.h>
 
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -291,7 +292,12 @@ struct _DisplayInfo
     Display *dpy;
   
     struct wl_display *wayland_display;
-    struct wl_seat *seat;
+    struct wl_seat *wl_seat;
+    struct wl_keyboard *wl_keyboard;
+  
+    struct xkb_state *xkb_state;
+    struct xkb_context *xkb_context;
+    struct xkb_keymap *xkb_keymap;
 
     XfceSMClient *session;
     gboolean quit;

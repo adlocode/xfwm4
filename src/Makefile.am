@@ -91,6 +91,7 @@ xfwm4_CFLAGS =								\
 	$(RANDR_CFLAGS)							\
 	$(RENDER_CFLAGS)						\
 	$(XINERAMA_CFLAGS)						\
+	$(XKBCOMMON_CFLAGS) \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DDATADIR=\"$(datadir)\"					\
 	-DHELPERDIR=\"$(HELPER_PATH_PREFIX)\"				\
@@ -114,6 +115,7 @@ xfwm4_LDADD =								\
 	$(RANDR_LIBS) 							\
 	$(RENDER_LIBS)							\
 	$(XINERAMA_LIBS)						\
+	$(XKBCOMMON_LIBS) \
 	$(MATH_LIBS)
 	
 xfwm4_wayland_SOURCES = \

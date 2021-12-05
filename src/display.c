@@ -343,11 +343,17 @@ myDisplayInit (GdkDisplay *gdisplay)
     display->xfilter = NULL;
     display->screens = NULL;
     display->clients = NULL;
+    display->wayland_display = NULL;
+    display->wl_seat = NULL;
+    display->wl_keyboard = NULL;
+    display->xkb_context = NULL;
     display->xgrabcount = 0;
     display->double_click_time = 250;
     display->double_click_distance = 5;
     display->nb_screens = 0;
     display->current_time = CurrentTime;
+  
+    display->xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
 
   if (GDK_IS_X11_DISPLAY (gdisplay))
     {
