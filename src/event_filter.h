@@ -69,5 +69,7 @@ eventFilterStack        *eventFilterPop                         (eventFilterSetu
 eventFilterSetup        *eventFilterInit                        (XfwmDevices *,
                                                                  gpointer);
 void                     eventFilterClose                       (eventFilterSetup *);
+eventFilterStatus        eventFilterIterate                     (eventFilterStack *filterelt,
+                                                                 XfwmEvent        *event);
 
 #endif /* INC_EVENT_FILTER_H */

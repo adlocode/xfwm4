@@ -152,6 +152,23 @@ default_event_filter (XfwmEvent *event, gpointer data)
     return EVENT_FILTER_STOP;
 }
 
+eventFilterStatus eventFilterIterate (eventFilterStack *filterelt,
+                                      XfwmEvent        *event)
+{
+  eventFilterStatus loop;
+  
+  loop = EVENT_FILTER_CONTINUE;
+
+    while ((filterelt) && (loop == EVENT_FILTER_CONTINUE))
+    {
+        eventFilterStack *filterelt_next = filterelt->next;
+        loop = (*filterelt->filter) (event, filterelt->data);
+        filterelt = filterelt_next;
+    }
+  
+  return loop;  
+}
+
 static GdkFilterReturn
 eventXfwmFilter (GdkXEvent *gdk_xevent, GdkEvent *gevent, gpointer data)
 {
@@ -167,14 +184,8 @@ eventXfwmFilter (GdkXEvent *gdk_xevent, GdkEvent *gevent, gpointer data)
     g_return_val_if_fail (filterelt != NULL, GDK_FILTER_CONTINUE);
 
     event = xfwm_device_translate_event (setup->devices, (XEvent *)gdk_xevent, NULL);
-    loop = EVENT_FILTER_CONTINUE;
-
-    while ((filterelt) && (loop == EVENT_FILTER_CONTINUE))
-    {
-        eventFilterStack *filterelt_next = filterelt->next;
-        loop = (*filterelt->filter) (event, filterelt->data);
-        filterelt = filterelt_next;
-    }
+  
+    loop = eventFilterIterate (filterelt, event);    
 
     xfwm_device_free_event (event);
     return (loop & EVENT_FILTER_REMOVE) ? GDK_FILTER_REMOVE : GDK_FILTER_CONTINUE;
