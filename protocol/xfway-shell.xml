@@ -11,6 +11,8 @@
     <description summary = "tell client to create an alt-tab switcher">
       Tell the client to create an alt-tab switcher.
     </description>
+    <arg name = "key" type = "uint"/>
+    <arg name = "modifiers" type = "uint"/>
   </event>
 
   <event name = "tabwin_next">

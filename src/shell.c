@@ -25,6 +25,10 @@
 #include <util/helpers.h>
 #include <xkbcommon/xkbcommon.h>
 
+#define XFWM_MOD_SHIFT     0x0001
+#define XFWM_MOD_CONTROL   0x0002
+#define XFWM_MOD_ALT       0x0004
+
 struct _Shell
 {
   xfwmDisplay *xfwm_display;
@@ -1329,7 +1333,7 @@ tabwin_binding (struct weston_keyboard *keyboard,
 	switcher_next(switcher);
   
 
-  xfway_shell_send_tabwin (shell->child.desktop_shell);
+  xfway_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT);
 }
 
 /*static const struct xfway_shell_interface xfway_desktop_shell_implementation =

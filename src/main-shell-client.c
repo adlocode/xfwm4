@@ -164,7 +164,7 @@ setupLog (gboolean debug)
 }
 #endif /* DEBUG */
 
-static void shell_handle_tabwin (void *data, struct xfway_shell *shell)
+static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t key, uint32_t modifiers)
 {
   g_print ("tabwin");
 
