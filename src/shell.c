@@ -688,15 +688,19 @@ activate (Shell *shell,
 
       if (state->keyboard_focus)
     {
-      if (state->keyboard_focus != view->surface)
-        {
+      //if (state->keyboard_focus != view->surface)
+        //{
       prev_cw = get_shell_surface (state->keyboard_focus);
-      if (prev_cw->toplevel_handle);
+      if (prev_cw->toplevel_handle && prev_cw->surface != cw->surface)
+            {
           wlr_foreign_toplevel_handle_v1_set_activated (prev_cw->toplevel_handle, 0);
-      if (cw->toplevel_handle)
+          weston_log ("deactivate\n");
+            }
+      
+    //}
+    }
+  if (cw->toplevel_handle)
           wlr_foreign_toplevel_handle_v1_set_activated (cw->toplevel_handle, 1);
-    }
-    }
 
     focus_state_set_focus (state, view->surface);
 

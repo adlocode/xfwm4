@@ -478,7 +478,9 @@ clientUpdateFocus (ScreenInfo *screen_info, Client * c, unsigned short flags)
     gboolean restacked;
 
     TRACE ("entering");
-
+  
+    if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
     c2 = ((client_focus != c) ? client_focus : NULL);
     if ((c) && !clientAcceptFocus (c))
     {
@@ -535,6 +537,11 @@ clientUpdateFocus (ScreenInfo *screen_info, Client * c, unsigned short flags)
     }
     clientSetNetActiveWindow (screen_info, c, 0);
     pending_focus = NULL;
+    }
+  else
+    {
+      client_focus = c;
+    }
 }
 
 void

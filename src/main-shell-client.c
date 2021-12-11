@@ -166,7 +166,21 @@ setupLog (gboolean debug)
 
 static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t key, uint32_t modifiers)
 {
+  ScreenInfo *screen_info = data;
+  XfwmEvent *event;
+  eventFilterStatus status;
   g_print ("tabwin");
+  
+  event = g_new0 (XfwmEvent, 1);
+  
+  event->meta.type = XFWM_EVENT_KEY;
+  
+  event->key.pressed = 1;
+  event->key.keycode = key + 8;
+  event->key.state = modifiers;
+  event->key.root =screen_info->xroot;
+  
+  status = eventFilterIterate (screen_info->display_info->xfilter, event);
 
 }
 
@@ -227,8 +241,10 @@ static void toplevel_handle_state(void *data,
 	Client *c = data;
 	uint32_t s = array_to_state(state);
 
-  //if (s & TOPLEVEL_STATE_ACTIVATED)
-    //focus = c;
+  if (s & TOPLEVEL_STATE_ACTIVATED){
+    clientUpdateFocus (c->screen_info, c, NO_FOCUS_FLAG);
+    g_print ("activate\n");
+  }
 }
 
 static void toplevel_handle_done(void *data,
@@ -366,7 +382,7 @@ void global_add (void               *data,
       struct xfway_shell *shell = NULL;
       shell = wl_registry_bind (registry, name, &xfway_shell_interface, 1);
 
-      xfway_shell_add_listener (shell, &shell_impl, NULL);
+      xfway_shell_add_listener (shell, &shell_impl, screen_info);
     }
   else if (strcmp(interface,
 			"zwlr_foreign_toplevel_manager_v1") == 0) {

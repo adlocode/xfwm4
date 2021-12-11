@@ -338,7 +338,7 @@ myDisplayInit (GdkDisplay *gdisplay)
     myDisplayCreateCursor (display);
 
     myDisplayCreateTimestampWin (display);
-              }
+    }
 
     display->xfilter = NULL;
     display->screens = NULL;
@@ -617,10 +617,13 @@ myDisplayRemoveScreen (DisplayInfo *display, ScreenInfo *screen)
 ScreenInfo *
 myDisplayGetScreenFromRoot (DisplayInfo *display, Window root)
 {
-    GSList *list;
+    GSList *list;g_print ("get screen\n");  
 
     g_return_val_if_fail (root != None, NULL);
     g_return_val_if_fail (display != NULL, NULL);
+  
+  bool x = GDK_IS_WAYLAND_DISPLAY (display->gdisplay);
+  g_print ("%d", x);
 
     for (list = display->screens; list; list = g_slist_next (list))
     {

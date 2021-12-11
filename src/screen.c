@@ -57,6 +57,8 @@
 #define WM_EXITING_TIMEOUT 15 /*seconds */
 #endif
 
+static int screen_id = 1;
+
 gboolean
 myScreenCheckWMAtom (ScreenInfo *screen_info, Atom atom)
 {
@@ -233,7 +235,17 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
         g_free (screen_info);
         return NULL;
     }
-    gdk_window_set_user_data (event_win, screen_info->gtk_win);}
+    gdk_window_set_user_data (event_win, screen_info->gtk_win);
+      
+    }
+  else
+    {
+      screen_info->xroot = screen_id;
+      if (screen_id < G_MAXINT)
+        {
+          screen_id++;
+        }
+    }
 
     screen_info->current_ws = 0;
     screen_info->previous_ws = 0;

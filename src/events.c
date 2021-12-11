@@ -301,6 +301,7 @@ handleKeyPress (DisplayInfo *display_info, XfwmEventKey *event)
     int key;
 
     TRACE ("entering");
+  g_print ("entering key press\n");
 
     ev_screen_info = myDisplayGetScreenFromRoot (display_info, event->root);
     if (!ev_screen_info)
@@ -313,12 +314,12 @@ handleKeyPress (DisplayInfo *display_info, XfwmEventKey *event)
     if (c)
     {
         screen_info = c->screen_info;
-        key = myScreenGetKeyPressed (screen_info, event);
+        key = myScreenGetKeyPressed (screen_info, event);g_print ("mid key press");
         status = EVENT_FILTER_REMOVE;
 
         switch (key)
         {
-            case KEY_MOVE:
+            case KEY_MOVE:g_print ("move");
                 clientMove (c, NULL);
                 break;
             case KEY_RESIZE:
@@ -552,8 +553,11 @@ handleKeyPress (DisplayInfo *display_info, XfwmEventKey *event)
             break;
     }
 
+    if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
     /* Release pending events */
     XAllowEvents (display_info->dpy, SyncKeyboard, CurrentTime);
+    }
 
     return status;
 }
@@ -2188,6 +2192,7 @@ handleEvent (DisplayInfo *display_info, XfwmEvent *event)
     status = EVENT_FILTER_PASS;
 
     TRACE ("entering");
+   g_print ("entering");
 
     /* Update the display time */
     myDisplayUpdateCurrentTime (display_info, event);
@@ -2287,6 +2292,8 @@ handleEvent (DisplayInfo *display_info, XfwmEvent *event)
             }
             break;
     }
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
     if (!gdk_events_pending () && !XPending (display_info->dpy))
     {
         if (display_info->reload)
@@ -2306,6 +2313,7 @@ handleEvent (DisplayInfo *display_info, XfwmEvent *event)
     }
 
     compositorHandleEvent (display_info, event->meta.xevent);
+    }
 
     return status;
 }

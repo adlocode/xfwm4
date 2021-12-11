@@ -67,6 +67,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <libxfce4ui/libxfce4ui.h>
+#include <gdk/gdkwayland.h>
 
 #include "event_filter.h"
 

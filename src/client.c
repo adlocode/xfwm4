@@ -1682,6 +1682,8 @@ clientFrameWayland (ScreenInfo *screen_info, struct zwlr_foreign_toplevel_handle
     c->startup_id = NULL;
 #endif /* HAVE_LIBSTARTUP_NOTIFICATION */
   
+  FLAG_SET (c->xfwm_flags, XFWM_FLAG_VISIBLE);
+  
   clientAddToList (c);
 
 out:

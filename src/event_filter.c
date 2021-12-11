@@ -152,10 +152,13 @@ default_event_filter (XfwmEvent *event, gpointer data)
     return EVENT_FILTER_STOP;
 }
 
-eventFilterStatus eventFilterIterate (eventFilterStack *filterelt,
-                                      XfwmEvent        *event)
+eventFilterStatus 
+eventFilterIterate (eventFilterSetup *setup, XfwmEvent *event)
 {
   eventFilterStatus loop;
+  eventFilterStack *filterelt;
+  
+  filterelt = setup->filterstack;
   
   loop = EVENT_FILTER_CONTINUE;
 
@@ -185,7 +188,7 @@ eventXfwmFilter (GdkXEvent *gdk_xevent, GdkEvent *gevent, gpointer data)
 
     event = xfwm_device_translate_event (setup->devices, (XEvent *)gdk_xevent, NULL);
   
-    loop = eventFilterIterate (filterelt, event);    
+    loop = eventFilterIterate (setup, event);    
 
     xfwm_device_free_event (event);
     return (loop & EVENT_FILTER_REMOVE) ? GDK_FILTER_REMOVE : GDK_FILTER_CONTINUE;
