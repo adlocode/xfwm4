@@ -1336,9 +1336,9 @@ tabwin_binding (struct weston_keyboard *keyboard,
 	weston_keyboard_set_focus(keyboard, NULL);
 	switcher_next(switcher);
   
-
   xfway_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT);
-}
+  
+  }
 
 /*static const struct xfway_shell_interface xfway_desktop_shell_implementation =
 {
@@ -1479,5 +1479,4 @@ void xfway_server_shell_init (xfwmDisplay *server, int argc, char *argv[])
   weston_compositor_add_key_binding (server->compositor, KEY_TAB, MODIFIER_ALT,
                                      tabwin_binding,
                                      shell);
-    
 }

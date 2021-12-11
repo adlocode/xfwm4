@@ -181,6 +181,8 @@ static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t
   event->key.root =screen_info->xroot;
   
   status = eventFilterIterate (screen_info->display_info->xfilter, event);
+  
+  xfwm_device_free_event (event);
 
 }
 
@@ -1041,8 +1043,7 @@ main (int argc, char **argv)
 
     status = initialize (replace_wm);
    
-
-    /*
+     /*
        status  < 0   =>   Error, cancel execution
        status == 0   =>   Run w/out session manager
        status == 1   =>   Connected to session manager
