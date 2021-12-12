@@ -16,7 +16,8 @@
         MA 02110-1301, USA.
 
 
-        xfwm4    - (c) 2002-2011 Olivier Fourdan
+        xfwm4         - (c) 2002-2011 Olivier Fourdan
+        xfwm4-wayland - (c) 2018-2021 adlo
 
  */
 
