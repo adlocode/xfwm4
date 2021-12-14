@@ -307,10 +307,10 @@ static void handle_toplevel_handle_request_activate (struct wl_listener *listene
   struct wlr_foreign_toplevel_handle_v1_activated_event *event = data;
 
   struct weston_seat *s;
-  wl_list_for_each (s, &cw->server->compositor->seat_list, link)
-    {
-      activate (cw->shell, cw->view, s, 0);
-    }
+  //wl_list_for_each (s, &cw->server->compositor->seat_list, link)
+    //{
+      activate (cw->shell, cw->view, event->seat, 0);
+    //}
 
 }
 

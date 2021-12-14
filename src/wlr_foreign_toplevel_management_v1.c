@@ -101,17 +101,17 @@ static void foreign_toplevel_handle_unset_fullscreen(struct wl_client *client,
 }
 
 static void foreign_toplevel_handle_activate(struct wl_client *client,
-		struct wl_resource *resource, struct wl_resource *seat) {
+		struct wl_resource *resource, struct wl_resource *seat_resource) {
 	struct wlr_foreign_toplevel_handle_v1 *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
 	}
 
-	//struct wlr_seat_client *seat_client = wlr_seat_client_from_resource(seat);
+	struct weston_seat *seat = wl_resource_get_user_data (seat_resource);
 	struct wlr_foreign_toplevel_handle_v1_activated_event event = {
 		.toplevel = toplevel,
-		//.seat = seat_client->seat,
+		.seat = seat,
 	};
 	wlr_signal_emit_safe(&toplevel->events.request_activate, &event);
 }
