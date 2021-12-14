@@ -596,7 +596,14 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
             }
             else
             {
+              if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+                {
                 XSetInputFocus (myScreenGetXDisplay (screen_info), c->window, RevertToPointerRoot, timestamp);
+                }
+              else
+                {
+                  xfway_shell_focus (screen_info->xfway_shell, c->toplevel_handle, screen_info->display_info->wl_seat);
+                }
             }
             if (myDisplayErrorTrapPop (screen_info->display_info) != Success)
             {

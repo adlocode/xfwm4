@@ -1673,6 +1673,7 @@ clientFrameWayland (ScreenInfo *screen_info, struct zwlr_foreign_toplevel_handle
     c->y = attr.y;
     c->width = attr.width;
     c->height = attr.height;
+    c->type = WINDOW_NORMAL;
 
     c->applied_geometry.x = c->x;
     c->applied_geometry.y = c->y;

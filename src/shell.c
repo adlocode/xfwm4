@@ -655,10 +655,10 @@ ensure_focus_state (Shell *shell, struct weston_seat *seat)
 }
 
 void
-activate (Shell *shell,
-          struct weston_view *view,
-          struct weston_seat *seat,
-          uint32_t            flags)
+shell_surface_focus (Shell              *shell,
+       struct weston_view *view,
+       struct weston_seat *seat,
+       uint32_t            flags)
 {
   struct weston_surface *main_surface;
   CWindowWayland *cw, *prev_cw;
@@ -670,15 +670,8 @@ activate (Shell *shell,
   cw = get_shell_surface (main_surface);
   if (cw == NULL)
     return;
-
-  new_layer_link = shell_surface_calculate_layer_link (cw);
-
-  if (new_layer_link == NULL)
-    return;
-  if (new_layer_link == &cw->view->layer_link)
-    return;
-
-      weston_view_activate (view, seat,
+  
+  weston_view_activate (view, seat,
                             WESTON_ACTIVATE_FLAG_CLICKED |
                             WESTON_ACTIVATE_FLAG_CONFIGURE);
 
@@ -702,7 +695,35 @@ activate (Shell *shell,
   if (cw->toplevel_handle)
           wlr_foreign_toplevel_handle_v1_set_activated (cw->toplevel_handle, 1);
 
-    focus_state_set_focus (state, view->surface);
+    focus_state_set_focus (state, view->surface);  
+  
+  
+}
+
+void
+shell_surface_raise  (Shell              *shell,
+       struct weston_view *view,
+       struct weston_seat *seat,
+       uint32_t            flags)
+{
+  struct weston_surface *main_surface;
+  CWindowWayland *cw, *prev_cw;
+  struct weston_layer_entry *new_layer_link;
+  struct focus_state *state;
+  struct weston_surface *old_es;
+
+  main_surface = weston_surface_get_main_surface (view->surface);
+  cw = get_shell_surface (main_surface);
+  if (cw == NULL)
+    return;
+
+  new_layer_link = shell_surface_calculate_layer_link (cw);
+
+  if (new_layer_link == NULL)
+    return;
+  if (new_layer_link == &cw->view->layer_link)
+    return;
+      
 
       weston_view_geometry_dirty (cw->view);
       weston_layer_entry_remove (&cw->view->layer_link);
@@ -710,6 +731,18 @@ activate (Shell *shell,
       weston_view_geometry_dirty (cw->view);
       weston_surface_damage (main_surface);
       weston_desktop_surface_propagate_layer (cw->desktop_surface);
+  
+}
+
+void
+activate (Shell *shell,
+          struct weston_view *view,
+          struct weston_seat *seat,
+          uint32_t            flags)
+{
+  shell_surface_focus (shell, view, seat, flags);
+  shell_surface_raise (shell, view, seat, flags);
+  
 }
 static void click_to_activate_binding (struct weston_pointer *pointer,
                                        const struct timespec *time,

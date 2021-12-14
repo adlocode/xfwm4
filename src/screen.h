@@ -55,6 +55,7 @@
 #include "hints.h"
 
 #include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+#include "protocol/xfway-shell-client-protocol.h"
 
 #define MODIFIER_MASK           (ShiftMask | \
                                  ControlMask | \
@@ -105,6 +106,8 @@ struct _ScreenInfo
     gint pointer_grabs;
   
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+  
+    struct xfway_shell *xfway_shell;
 
     /* Theme pixmaps and other params, per screen */
     GdkRGBA title_colors[2];

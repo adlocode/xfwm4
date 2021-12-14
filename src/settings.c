@@ -622,6 +622,7 @@ loadKeyBindings (ScreenInfo *screen_info)
     parseShortcut (screen_info, KEY_TOGGLE_ABOVE, "above_key", shortcuts);
     parseShortcut (screen_info, KEY_TOGGLE_FULLSCREEN, "fullscreen_key", shortcuts);
     parseShortcut (screen_info, KEY_UP_WORKSPACE, "up_workspace_key", shortcuts);
+ 
 
     for (i = 0; i < 12; i++)
     {
@@ -634,8 +635,18 @@ loadKeyBindings (ScreenInfo *screen_info)
 
     xfce_shortcuts_free (shortcuts);
 
-    myScreenUngrabKeys (screen_info);
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
+  myScreenUngrabKeys (screen_info);
     myScreenGrabKeys (screen_info);
+    }
+    else
+    {
+      //A hack to make the tabwin work
+      screen_info->params->keys[KEY_CYCLE_WINDOWS].keycode = 15 + 8;
+      screen_info->params->keys[KEY_CYCLE_WINDOWS].modifier = 0x04;
+    }
+   g_print ("keys3\n");
 
     return;
 }

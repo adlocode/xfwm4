@@ -26,6 +26,22 @@
       Tell the client to destroy the alt-tab switcher.
     </description>
   </event>
+  
+  <request name = "focus">
+    <description summary = "focus window">
+      Focus the window
+    </description>
+    <arg name = "handle" type = "object" interface = "zwlr_foreign_toplevel_handle_v1"/>
+    <arg name = "seat" type = "object" interface = "wl_seat"/>
+    </request>
+    
+  <request name = "raise">
+    <description summary = "raise window">
+      Focus the window
+    </description>
+    <arg name = "handle" type = "object" interface = "zwlr_foreign_toplevel_handle_v1"/>
+    <arg name = "seat" type = "object" interface = "wl_seat"/>
+    </request>
 
   </interface>
 </protocol>

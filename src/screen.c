@@ -271,6 +271,8 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
 
     screen_info->key_grabs = 0;
     screen_info->pointer_grabs = 0;
+  
+    screen_info->xfway_shell = NULL;
 
   if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
     {
@@ -353,10 +355,11 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
         xfwmPixmapInit (screen_info, &screen_info->top[i][ACTIVE]);
         xfwmPixmapInit (screen_info, &screen_info->top[i][INACTIVE]);
     }
+    }
    
     screen_info->monitors_index = NULL;
     myScreenInvalidateMonitorCache (screen_info);
-    myScreenRebuildMonitorIndex (screen_info); }
+    myScreenRebuildMonitorIndex (screen_info);
 
     return (screen_info);
 }
@@ -762,7 +765,7 @@ myScreenRebuildMonitorIndex (ScreenInfo *screen_info)
      * the bigger ones first (giving preference to taller monitors
      * over wider monitors)
      */
-    num_monitors = xfwm_get_n_monitors (screen_info->gscr);
+    num_monitors = xfwm_get_n_monitors (screen_info->gscr);g_print ("num monitors: %d\n", num_monitors);
     for (i = 0; i < num_monitors; i++)
     {
         xfwm_get_monitor_geometry (screen_info->gscr, i, &monitor, TRUE);

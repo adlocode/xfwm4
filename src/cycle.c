@@ -50,6 +50,8 @@
 #include "workspaces.h"
 #include "event_filter.h"
 
+#include "../util/libgwater-wayland.h"
+
 typedef struct _ClientCycleData ClientCycleData;
 struct _ClientCycleData
 {
@@ -107,6 +109,7 @@ clientCycleCreateList (Client *c)
     for (c2 = c, i = 0; c && i < screen_info->client_count; i++, c2 = c2->next)
     {
         search_range = range;
+      g_print (c2->name);
         /*
          *  We want to include modals even if skip pager/taskbar because
          *  modals are supposed to be focused
@@ -115,10 +118,14 @@ clientCycleCreateList (Client *c)
         {
             search_range |= (SEARCH_INCLUDE_SKIP_TASKBAR | SEARCH_INCLUDE_SKIP_PAGER);
         }
+      if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+        {
         if (!clientSelectMask (c2, NULL, search_range, WINDOW_REGULAR_FOCUSABLE))
         {
             TRACE ("%s not in select mask", c2->name);
+          g_print ("%s not in select mask", c2->name);
             continue;
+        }
         }
         if (screen_info->params->cycle_apps_only)
         {
@@ -157,6 +164,7 @@ clientCycleCreateList (Client *c)
                 }
             }
         }
+      g_print ("adding %s\n", c2->name);
 
         TRACE ("adding %s", c2->name);
         client_list = g_list_append (client_list, c2);
@@ -253,6 +261,8 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
     int key, modifiers;
     gboolean cycling;
     GList *li;
+  
+  g_print ("cycle filter\n");
 
     TRACE ("entering");
 
@@ -467,6 +477,9 @@ clientCycle (Client * c, XfwmEventKey *event)
     ClientCycleData passdata;
     GList *client_list, *selected;
     int key, modifier;
+  
+  g_print ("enter client cycle\n");
+  g_print (c->name);
 
     g_return_if_fail (c != NULL);
     TRACE ("client \"%s\" (0x%lx)", c->name, c->window);
@@ -491,6 +504,7 @@ clientCycle (Client * c, XfwmEventKey *event)
     {
         selected = g_list_next (client_list);
         modifier = screen_info->params->keys[KEY_CYCLE_WINDOWS].modifier;
+      g_print ("client cycle select\n");
     }
     if (!selected)
     {
@@ -509,8 +523,11 @@ clientCycle (Client * c, XfwmEventKey *event)
         g_list_free (client_list);
         return;
     }
+  g_print ("mid client cycle\n");
 
-    if (!myScreenGrabKeyboard (screen_info, KeyPressMask | KeyReleaseMask, event->time))
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
+  if (!myScreenGrabKeyboard (screen_info, KeyPressMask | KeyReleaseMask, event->time))
     {
         TRACE ("grab failed in clientCycle");
         myDisplayBeep (display_info);
@@ -518,6 +535,7 @@ clientCycle (Client * c, XfwmEventKey *event)
         g_list_free (client_list);
 
         return;
+    }
     }
 
     passdata.wireframe = NULL;
@@ -528,14 +546,19 @@ clientCycle (Client * c, XfwmEventKey *event)
     {
       clientRaise ((Client *) selected->data, None);
     }
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
     if (screen_info->params->cycle_draw_frame)
     {
         passdata.wireframe = wireframeCreate ((Client *) selected->data);
     }
+    }g_print ("c\n");
     passdata.tabwin = tabwinCreate (&client_list, selected, screen_info->params->cycle_workspaces);
     eventFilterPush (display_info->xfilter, clientCycleEventFilter, &passdata);
+  
+   GWaterWaylandSource *source = g_water_wayland_source_new_for_display (NULL, screen_info->display_info->wayland_display);
 
-    gtk_main ();
+    gtk_main ();/*
     eventFilterPop (display_info->xfilter);
     TRACE ("leaving cycle loop");
     if (passdata.wireframe)
@@ -553,7 +576,7 @@ clientCycle (Client * c, XfwmEventKey *event)
     {
         /* A bit of a hack, flush EnterNotify if the pointer is inside
          * the tabwin to defeat focus-follow-mouse tracking */
-        eventFilterPush (display_info->xfilter, clientCycleFlushEventFilter, display_info);
+       /* eventFilterPush (display_info->xfilter, clientCycleFlushEventFilter, display_info);
         gtk_main ();
         eventFilterPop (display_info->xfilter);
     }
@@ -563,7 +586,7 @@ clientCycle (Client * c, XfwmEventKey *event)
     if (c)
     {
         clientCycleActivate (c);
-    }
+    }*/
 }
 
 gboolean

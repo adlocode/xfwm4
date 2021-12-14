@@ -74,6 +74,8 @@ xfwm4_SOURCES =								\
 	workspaces.h							\
 	xsync.c								\
 	xsync.h								\
+		$(top_srcdir)/util/libgwater-wayland.c 				\
+	$(top_srcdir)/util/libgwater-wayland.h
 	xpm-color-table.h
 
 xfwm4_CFLAGS =								\

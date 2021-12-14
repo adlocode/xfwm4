@@ -47,6 +47,7 @@
 #include <math.h>
 #include <glib.h>
 #include <gdk/gdk.h>
+#include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 
@@ -500,7 +501,7 @@ createWindowlist (ScreenInfo *screen_info, TabwinWidget *tabwin_widget)
         c = (Client *) client_list->data;
         TRACE ("adding \"%s\" (0x%lx)", c->name, c->window);
         icon_pixbuf = (GdkPixbuf *) icon_list->data;
-        icon_list = g_list_next (icon_list);
+        icon_list = g_list_next (icon_list);g_print ("window list\n");
 
         window_button = gtk_button_new ();
         gtk_button_set_relief (GTK_BUTTON (window_button), GTK_RELIEF_NONE);
@@ -657,7 +658,7 @@ computeTabwinData (ScreenInfo *screen_info, TabwinWidget *tabwin_widget)
     tabwin->label_height = 30;
     preview = screen_info->params->cycle_preview && compositorIsActive (screen_info);
     tabwin->icon_scale = gtk_widget_get_scale_factor (GTK_WIDGET (tabwin_widget));
-
+g_print (" compute\n");
     /* We need to account for changes to the font size in the user's
      * appearance theme and gtkrc settings */
     layout = gtk_widget_create_pango_layout (GTK_WIDGET (tabwin_widget), "");
@@ -725,12 +726,15 @@ computeTabwinData (ScreenInfo *screen_info, TabwinWidget *tabwin_widget)
         tabwin->grid_cols = (int) (ceil ((double) tabwin->client_count /
                                          (double) tabwin->grid_rows));
     }
+  
 
     /* pack the client icons */
     for (client_list = *tabwin->client_list; client_list; client_list = g_list_next (client_list))
     {
         Client *c = (Client *) client_list->data;
 
+      if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
         if (screen_info->params->cycle_tabwin_mode == STANDARD_ICON_GRID)
         {
             if (preview)
@@ -750,8 +754,14 @@ computeTabwinData (ScreenInfo *screen_info, TabwinWidget *tabwin_widget)
             icon_pixbuf = getAppIcon (c, tabwin->icon_size * tabwin->icon_scale,
                                       tabwin->icon_size * tabwin->icon_scale);
         }
+      }
+      else
+        {
+          icon_pixbuf = NULL;
+        }
         tabwin->icon_list = g_list_append(tabwin->icon_list, icon_pixbuf);
-    }
+    
+    }g_print ("exit compute\n");
 }
 
 static TabwinWidget *
@@ -793,7 +803,7 @@ tabwinCreateWidget (Tabwin *tabwin, ScreenInfo *screen_info, gint monitor_num)
         }
     }
     gtk_widget_set_app_paintable (GTK_WIDGET (tabwin_widget), TRUE);
-    gtk_widget_realize (GTK_WIDGET (tabwin_widget));
+    gtk_widget_realize (GTK_WIDGET (tabwin_widget));g_print ("tabwin2\n");
 
     if (tabwin->icon_list == NULL)
     {
@@ -844,7 +854,7 @@ tabwinCreateWidget (Tabwin *tabwin, ScreenInfo *screen_info, gint monitor_num)
                       G_CALLBACK (tabwin_draw),
                       (gpointer) tabwin_widget);
 
-    gtk_widget_show_all (GTK_WIDGET (tabwin_widget));
+    gtk_widget_show_all (GTK_WIDGET (tabwin_widget));g_print ("tabwin3\n");
 
     return tabwin_widget;
 }
@@ -925,10 +935,10 @@ tabwinCreate (GList **client_list, GList *selected, gboolean display_workspace)
 
     num_monitors = myScreenGetNumMonitors (screen_info);
     has_primary = myScreenHasPrimaryMonitor (screen_info, c->window);
-
+g_print ("tabwin1\n");
     for (i = 0; i < num_monitors; i++)
     {
-        gint monitor_index;
+        gint monitor_index;g_print ("tabwin1a\n");
 
         monitor_index = myScreenGetMonitorIndex (screen_info, i);
 

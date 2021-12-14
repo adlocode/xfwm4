@@ -1,4 +1,4 @@
-/*      $Id$
+  /*      $Id$
 
         This program is free software; you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -382,7 +382,9 @@ void global_add (void               *data,
   if (strcmp (interface, "xfway_shell") == 0)
     {
       struct xfway_shell *shell = NULL;
+      g_print ("xfway-shell\n");
       shell = wl_registry_bind (registry, name, &xfway_shell_interface, 1);
+      screen_info->xfway_shell = shell;
 
       xfway_shell_add_listener (shell, &shell_impl, screen_info);
     }
@@ -809,6 +811,8 @@ initialize (gboolean replace_wm)
     initMenuEventWin ();
     clientClearFocus (NULL);
     display_info = myDisplayInit (gdk_display_get_default ());
+  
+    display_info->wayland_display = wayland_display;
 
 #ifdef HAVE_COMPOSITOR
     display_info->enable_compositor = compositor;
@@ -830,11 +834,11 @@ initialize (gboolean replace_wm)
         Window temp_xwindow;
         GdkWindow *screen_window;
 
-/*        if (i == default_screen)
-        {
+        //if (i == default_screen)
+        //{
             gscr = gdk_display_get_default_screen (display_info->gdisplay);
-        }
-        else
+        //}
+ /*       else
         {
             /* create temp 1x1 child window on this screen */
 /*            temp_xwindow = XCreateSimpleWindow (display_info->dpy,
