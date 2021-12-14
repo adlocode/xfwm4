@@ -725,6 +725,8 @@ static int load_wayland_backend (xfwmDisplay *server, int32_t use_pixman)
 	config.sprawl = 0;
 	config.fullscreen = 0;
 	config.cursor_theme = NULL;
+  
+  server->is_windowed = 1;
 
 
 	ret = weston_compositor_load_backend (server->compositor, WESTON_BACKEND_WAYLAND, &config.base);
@@ -982,6 +984,7 @@ int main (int    argc,
   log_ctx = weston_log_ctx_compositor_create ();
 
   server->background = NULL;
+  server->is_windowed = 0;
 
 
    /* pid_t id = fork ();

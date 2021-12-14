@@ -1198,6 +1198,8 @@ struct switcher {
 	struct wl_listener listener;
 	struct weston_keyboard_grab grab;
 	struct wl_array minimized_array;
+  uint32_t key;
+  uint32_t modifier;
 };
 
 static void
@@ -1218,7 +1220,7 @@ switcher_next(struct switcher *switcher)
 		*minimized = view;
 	}*/
 
-  xfway_shell_send_tabwin_next (switcher->shell->child.desktop_shell);
+  xfway_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT);
 
 	wl_list_for_each(view, &switcher->shell->xfwm_display->surfaces_layer.view_list.link, layer_link.link) {
 		shsurf = get_shell_surface(view->surface);
@@ -1317,7 +1319,7 @@ switcher_key(struct weston_keyboard_grab *grab,
 	struct switcher *switcher = container_of(grab, struct switcher, grab);
 	enum wl_keyboard_key_state state = state_w;
 
-	if (key == KEY_TAB && state == WL_KEYBOARD_KEY_STATE_PRESSED)
+	if (key == switcher->key && state == WL_KEYBOARD_KEY_STATE_PRESSED)
 		switcher_next(switcher);
 }
 
@@ -1360,6 +1362,7 @@ tabwin_binding (struct weston_keyboard *keyboard,
 	switcher->shell = shell;
 	switcher->current = NULL;
 	switcher->listener.notify = switcher_handle_view_destroy;
+  switcher->key = key;
 	wl_list_init(&switcher->listener.link);
 	wl_array_init(&switcher->minimized_array);
 
@@ -1512,4 +1515,10 @@ void xfway_server_shell_init (xfwmDisplay *server, int argc, char *argv[])
   weston_compositor_add_key_binding (server->compositor, KEY_TAB, MODIFIER_ALT,
                                      tabwin_binding,
                                      shell);
+  if (server->is_windowed)
+    {
+      weston_compositor_add_key_binding (server->compositor, KEY_A, MODIFIER_ALT,
+                                     tabwin_binding,
+                                     shell);
+    }
 }

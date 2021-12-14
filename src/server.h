@@ -48,6 +48,7 @@ struct _xfwmDisplay
       const struct weston_drm_output_api *drm;
       const struct weston_windowed_output_api *windowed;
     } api;
+  bool is_windowed;
 
   XfconfChannel *channel;
 
