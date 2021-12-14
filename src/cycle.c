@@ -35,6 +35,7 @@
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkwayland.h>
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 
@@ -556,11 +557,17 @@ clientCycle (Client * c, XfwmEventKey *event)
     passdata.tabwin = tabwinCreate (&client_list, selected, screen_info->params->cycle_workspaces);
     eventFilterPush (display_info->xfilter, clientCycleEventFilter, &passdata);
   
-   GWaterWaylandSource *source = g_water_wayland_source_new_for_display (NULL, screen_info->display_info->wayland_display);
+  if (GDK_IS_WAYLAND_DISPLAY (screen_info->display_info->gdisplay))
+    {
+  GWaterWaylandSource *source = g_water_wayland_source_new_for_display (NULL, screen_info->display_info->wayland_display);
+    }
 
-    gtk_main ();/*
+    gtk_main ();
     eventFilterPop (display_info->xfilter);
     TRACE ("leaving cycle loop");
+  
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
     if (passdata.wireframe)
     {
         wireframeDelete (passdata.wireframe);
@@ -576,7 +583,7 @@ clientCycle (Client * c, XfwmEventKey *event)
     {
         /* A bit of a hack, flush EnterNotify if the pointer is inside
          * the tabwin to defeat focus-follow-mouse tracking */
-       /* eventFilterPush (display_info->xfilter, clientCycleFlushEventFilter, display_info);
+        eventFilterPush (display_info->xfilter, clientCycleFlushEventFilter, display_info);
         gtk_main ();
         eventFilterPop (display_info->xfilter);
     }
@@ -586,7 +593,8 @@ clientCycle (Client * c, XfwmEventKey *event)
     if (c)
     {
         clientCycleActivate (c);
-    }*/
+    }
+    }
 }
 
 gboolean
