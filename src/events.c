@@ -566,9 +566,13 @@ static eventFilterStatus
 handleKeyRelease (DisplayInfo *display_info, XfwmEventKey *event)
 {
     TRACE ("entering");
+  
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
 
     /* Release pending events */
     XAllowEvents (display_info->dpy, SyncKeyboard, CurrentTime);
+    }
 
     return EVENT_FILTER_PASS;
 }

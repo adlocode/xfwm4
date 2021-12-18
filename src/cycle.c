@@ -345,6 +345,8 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
             }
             else
             {
+              if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+                {
                 int keysym = XkbKeycodeToKeysym (event->meta.xevent->xany.display, event->key.keycode, 0, 0);
 
                 if (IsModifierKey(keysym))
@@ -352,6 +354,14 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
                     if (!(myScreenGetModifierPressed (screen_info) & modifiers))
                     {
                         cycling = FALSE;
+                    }
+                }
+                }
+              else
+                {
+                  if (event->key.state & screen_info->params->keys[KEY_CYCLE_WINDOWS].modifier)
+                    {
+                      cycling = FALSE;
                     }
                 }
             }
@@ -555,16 +565,11 @@ clientCycle (Client * c, XfwmEventKey *event)
     }
     }g_print ("c\n");
     passdata.tabwin = tabwinCreate (&client_list, selected, screen_info->params->cycle_workspaces);
-    eventFilterPush (display_info->xfilter, clientCycleEventFilter, &passdata);
+    eventFilterPush (display_info->xfilter, clientCycleEventFilter, &passdata);  
   
-  if (GDK_IS_WAYLAND_DISPLAY (screen_info->display_info->gdisplay))
-    {
-  GWaterWaylandSource *source = g_water_wayland_source_new_for_display (NULL, screen_info->display_info->wayland_display);
-    }
-
     gtk_main ();
     eventFilterPop (display_info->xfilter);
-    TRACE ("leaving cycle loop");
+    TRACE ("leaving cycle loop"); 
   
   if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
     {
@@ -573,11 +578,14 @@ clientCycle (Client * c, XfwmEventKey *event)
         wireframeDelete (passdata.wireframe);
     }
     updateXserverTime (display_info);
-
+    }
     c = tabwinGetSelected (passdata.tabwin);
     tabwinDestroy (passdata.tabwin);
     g_free (passdata.tabwin);
     g_list_free (client_list);
+  
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
 
     if (passdata.inside)
     {
@@ -589,12 +597,14 @@ clientCycle (Client * c, XfwmEventKey *event)
     }
 
     myScreenUngrabKeyboard (screen_info, myDisplayGetCurrentTime (display_info));
+    
 
     if (c)
     {
         clientCycleActivate (c);
     }
-    }
+     }
+  g_print ("exit client cycle\n");
 }
 
 gboolean

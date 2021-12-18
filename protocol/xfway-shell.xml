@@ -13,6 +13,7 @@
     </description>
     <arg name = "key" type = "uint"/>
     <arg name = "modifiers" type = "uint"/>
+    <arg name = "key_press" type = "uint"/>
   </event>
 
   <event name = "tabwin_next">

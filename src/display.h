@@ -68,6 +68,7 @@
 #include <glib.h>
 #include <libxfce4ui/libxfce4ui.h>
 #include <gdk/gdkwayland.h>
+#include "../util/libgwater-wayland.h"
 
 #include "event_filter.h"
 
@@ -295,6 +296,8 @@ struct _DisplayInfo
     struct wl_display *wayland_display;
     struct wl_seat *wl_seat;
     struct wl_keyboard *wl_keyboard;
+  
+    GWaterWaylandSource *wsource;
   
     struct xkb_state *xkb_state;
     struct xkb_context *xkb_context;

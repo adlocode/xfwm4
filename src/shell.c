@@ -1220,7 +1220,7 @@ switcher_next(struct switcher *switcher)
 		*minimized = view;
 	}*/
 
-  xfway_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT);
+  xfway_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
 
 	wl_list_for_each(view, &switcher->shell->xfwm_display->surfaces_layer.view_list.link, layer_link.link) {
 		shsurf = get_shell_surface(view->surface);
@@ -1307,7 +1307,7 @@ switcher_destroy(struct switcher *switcher)
 	}
 	wl_array_release(&switcher->minimized_array);*/
 
-  xfway_shell_send_tabwin_destroy (switcher->shell->child.desktop_shell);
+  xfway_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 0);
 
 	free(switcher);
 }
@@ -1372,7 +1372,7 @@ tabwin_binding (struct weston_keyboard *keyboard,
 	weston_keyboard_set_focus(keyboard, NULL);
 	switcher_next(switcher);
   
-  xfway_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT);
+  xfway_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
   
   }
 

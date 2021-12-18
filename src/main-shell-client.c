@@ -164,7 +164,7 @@ setupLog (gboolean debug)
 }
 #endif /* DEBUG */
 
-static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t key, uint32_t modifiers)
+static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
 {
   ScreenInfo *screen_info = data;
   XfwmEvent *event;
@@ -175,7 +175,7 @@ static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t
   
   event->meta.type = XFWM_EVENT_KEY;
   
-  event->key.pressed = 1;
+  event->key.pressed = key_press;
   event->key.keycode = key + 8;
   event->key.state = modifiers;
   event->key.root =screen_info->xroot;
@@ -330,14 +330,52 @@ wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard,
        client_state->xkb_keymap = xkb_keymap;
        client_state->xkb_state = xkb_state;
 }
+static void wl_keyboard_enter (void              *data,
+                               uint32_t           serial,
+                               struct wl_surface *surface,
+                               uint32_t          *keys)
+{
+  
+}
+static void wl_keyboard_leave (void              *data,
+                               uint32_t           serial,
+                               struct wl_surface *surface)
+{
+  
+}
+static void
+wl_keyboard_key (void     *data,
+                 uint32_t  serial,
+                 uint32_t  time,
+                 uint32_t  key,
+                 uint32_t  state)
+{
+  
+}
+static void
+wl_keyboard_modifiers (void     *data,
+                       uint32_t  serial,
+                       uint32_t  mods_depressed,
+                       uint32_t  mods_latched,
+                       uint32_t  mods_locked)
+{
+  
+}
+static void
+wl_keyboard_repeat_info (void    *data,
+                         int32_t  rate,
+                         int32_t  delay)
+{
+  
+}
 
 static const struct wl_keyboard_listener wl_keyboard_listener = {
        .keymap = wl_keyboard_keymap,
-       .enter = NULL,
-       .leave = NULL,
-       .key = NULL,
-       .modifiers = NULL,
-       .repeat_info = NULL,
+       .enter = wl_keyboard_enter,
+       .leave = wl_keyboard_leave,
+       .key = wl_keyboard_key,
+       .modifiers = wl_keyboard_modifiers,
+       .repeat_info = wl_keyboard_repeat_info,
 };
 
 static void
@@ -811,9 +849,15 @@ initialize (gboolean replace_wm)
     initMenuEventWin ();
     clientClearFocus (NULL);
     display_info = myDisplayInit (gdk_display_get_default ());
+  //g_print ("\ndisplay\n");
+    //wl_display_roundtrip (display_info->wayland_display);
+    //wl_display_roundtrip (display_info->wayland_display);
   
-    display_info->wayland_display = wayland_display;
-
+  //if (gdk_wayland_display_query_registry (display_info->gdisplay, "zwlr_foreign_toplevel_manager_v1" == TRUE))
+    //{
+      //g_print ("\nforeign toplevel\n");
+    //}
+g_print ("\ndisplay\n");
 #ifdef HAVE_COMPOSITOR
     display_info->enable_compositor = compositor;
 #else
@@ -823,6 +867,10 @@ initialize (gboolean replace_wm)
     //initModifiers (display_info->dpy);
 
     //setupHandler (TRUE);
+    
+  //wl_display_flush (display_info->wayland_display);
+  //wl_display_roundtrip (display_info->wayland_display);
+    registry = wl_display_get_registry (display_info->wayland_display);
 
     //nscreens = ScreenCount (display_info->dpy);
     nscreens = 1;
@@ -876,9 +924,9 @@ initialize (gboolean replace_wm)
           return -2;
         }
           
-         registry = wl_display_get_registry (wayland_display);
-
-    wl_registry_add_listener (registry, &registry_listener, screen_info);
+         wl_registry_add_listener (registry, &registry_listener, screen_info);
+         wl_display_roundtrip (display_info->wayland_display);
+         //wl_display_roundtrip (display_info->wayland_display);
           
           if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
             {
@@ -1032,9 +1080,7 @@ main (int argc, char **argv)
     setupLog (debug);
 #endif /* DEBUG */
     DBG ("xfwm4 starting");
-    g_print ("%s", "xfwm4 starting");
-  
-    wayland_display = wl_display_connect (NULL);
+    g_print ("%s", "xfwm4 starting");    
 
     gtk_init (&argc, &argv);
 
@@ -1066,13 +1112,11 @@ main (int argc, char **argv)
         case 1:
             /* enter GTK main loop */
             g_print ("gtk\n");
-            wl_display_roundtrip (wayland_display);
-            wl_display_roundtrip (wayland_display);
 
-            source = g_water_wayland_source_new_for_display (NULL, wayland_display);
-      
-      //GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      //gtk_widget_show (window);
+       //source = g_water_wayland_source_new_for_display (NULL, display_info->wayland_display);
+
+      GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+      gtk_widget_show (window);
             gtk_main ();
             break;
         default:
@@ -1080,7 +1124,8 @@ main (int argc, char **argv)
             exit (1);
             break;
     }
-    cleanUp ();
+    //cleanUp ();
     DBG ("xfwm4 terminated");
+  g_print ("xfwm4 terminated\n");
     return 0;
 }

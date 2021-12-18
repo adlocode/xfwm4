@@ -209,7 +209,9 @@ myDisplayInit (GdkDisplay *gdisplay)
   g_print ("enter display init\n");
 
     display->gdisplay = gdisplay;
-    display->dpy = (Display *) gdk_x11_display_get_xdisplay (gdisplay);
+    //display->dpy = (Display *) gdk_x11_display_get_xdisplay (gdisplay);
+  
+    display->wayland_display = gdk_wayland_display_get_wl_display (gdisplay);
 
     display->session = NULL;
     display->quit = FALSE;
@@ -342,8 +344,7 @@ myDisplayInit (GdkDisplay *gdisplay)
 
     display->xfilter = NULL;
     display->screens = NULL;
-    display->clients = NULL;
-    display->wayland_display = NULL;
+    display->clients = NULL;    
     display->wl_seat = NULL;
     display->wl_keyboard = NULL;
     display->xkb_context = NULL;
