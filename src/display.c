@@ -209,7 +209,7 @@ myDisplayInit (GdkDisplay *gdisplay)
   g_print ("enter display init\n");
 
     display->gdisplay = gdisplay;
-    //display->dpy = (Display *) gdk_x11_display_get_xdisplay (gdisplay);
+    display->dpy = (Display *) gdk_x11_display_get_xdisplay (gdisplay);
   
     display->wayland_display = gdk_wayland_display_get_wl_display (gdisplay);
 
