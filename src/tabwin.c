@@ -776,6 +776,8 @@ tabwinCreateWidget (Tabwin *tabwin, ScreenInfo *screen_info, gint monitor_num)
     GdkRectangle monitor;
     gint border_radius = 0;
     GtkBorder border, padding;
+    struct wl_surface *surface;
+    struct zwlr_layer_surface_v1 *layer_surface;
 
     TRACE ("monitor %i", monitor_num);
 
@@ -804,6 +806,15 @@ tabwinCreateWidget (Tabwin *tabwin, ScreenInfo *screen_info, gint monitor_num)
     }
     gtk_widget_set_app_paintable (GTK_WIDGET (tabwin_widget), TRUE);
     gtk_widget_realize (GTK_WIDGET (tabwin_widget));g_print ("tabwin2\n");
+  
+    GdkWindow *w = gtk_widget_get_window (tabwin_widget);
+    gdk_wayland_window_set_use_custom_surface (w);
+    surface = gdk_wayland_window_get_wl_surface (w);
+    layer_surface = zwlr_layer_shell_v1_get_layer_surface (screen_info->layer_shell,
+                                                           surface,
+                                                           screen_info->wl_output,
+                                                           ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
+                                                           "xfwm4");   
 
     if (tabwin->icon_list == NULL)
     {

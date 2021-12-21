@@ -74,6 +74,9 @@ xfwm4_SOURCES =								\
 	workspaces.h							\
 	xsync.c								\
 	xsync.h								\
+		$(top_srcdir)/protocol/wlr-layer-shell-unstable-v1-protocol.c \
+	$(top_srcdir)/protocol/wlr-layer-shell-unstable-v1-client-protocol.h \
+	$(top_srcdir)/protocol/xdg-shell.c \
 		$(top_srcdir)/util/libgwater-wayland.c 				\
 	$(top_srcdir)/util/libgwater-wayland.h
 	xpm-color-table.h
@@ -248,6 +251,9 @@ xfwm4_wayland_shell_SOURCES =								\
 	$(top_srcdir)/protocol/xfway-shell-client-protocol.h \
 	$(top_srcdir)/protocol/wlr-foreign-toplevel-management-unstable-v1-protocol.c \
 	$(top_srcdir)/protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h \
+	$(top_srcdir)/protocol/wlr-layer-shell-unstable-v1-protocol.c \
+	$(top_srcdir)/protocol/wlr-layer-shell-unstable-v1-client-protocol.h \
+	$(top_srcdir)/protocol/xdg-shell.c \
 	$(top_srcdir)/util/libgwater-wayland.c 				\
 	$(top_srcdir)/util/libgwater-wayland.h
 

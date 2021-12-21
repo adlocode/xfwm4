@@ -54,7 +54,8 @@
 #include "client.h"
 #include "hints.h"
 
-#include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+#include "protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
+#include "protocol/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "protocol/xfway-shell-client-protocol.h"
 
 #define MODIFIER_MASK           (ShiftMask | \
@@ -105,7 +106,10 @@ struct _ScreenInfo
     gint key_grabs;
     gint pointer_grabs;
   
+    struct wl_output *wl_output;
+  
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+    struct zwlr_layer_shell_v1 *layer_shell;
   
     struct xfway_shell *xfway_shell;
 

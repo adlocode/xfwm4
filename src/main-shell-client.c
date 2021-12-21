@@ -53,6 +53,7 @@
 #include <wayland-client.h>
 #include <protocol/xfway-shell-client-protocol.h>
 #include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+#include "protocol/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "../util/libgwater-wayland.h"
 
 #include "display.h"
@@ -436,6 +437,11 @@ void global_add (void               *data,
 				&toplevel_manager_impl, screen_info);
         g_print ("foreign-toplevel\n");
       }
+  else if (strcmp (interface, "zwlr_layer_shell_v1") == 0)
+    {
+      screen_info->layer_shell = wl_registry_bind (registry, name, &zwlr_layer_shell_v1_interface, 1);
+      g_print ("\nlayer shell\n");
+    }
   else if (strcmp(interface,
 			"wl_seat") == 0) {
       display_info->wl_seat = wl_registry_bind(registry, name,
@@ -444,6 +450,13 @@ void global_add (void               *data,
         wl_seat_add_listener(display_info->wl_seat,
 				&wl_seat_listener, screen_info);
         g_print ("\n***seat***\n");
+      }
+  else if (strcmp(interface,
+			"wl_output") == 0) {
+      screen_info->wl_output = wl_registry_bind(registry, name,
+				&wl_output_interface,
+				1);        
+        g_print ("\n***output***\n");
       }
 }
 void global_remove (void               *data,
