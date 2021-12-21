@@ -201,7 +201,7 @@
         See the documentation of xdg_popup for more details about what an
         xdg_popup is and how it is used.
       </description>
-      <arg name="popup" type="object" interface="zxdg_popup_v6"/>
+      <arg name="popup" type="object" interface="xdg_popup"/>
     </request>
 
     <request name="ack_configure">

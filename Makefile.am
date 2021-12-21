@@ -107,8 +107,8 @@ protocol/wlr-layer-shell-unstable-v1-client-protocol.h : $(top_srcdir)/protocol/
 protocol/wlr-layer-shell-unstable-v1-protocol.c : $(top_srcdir)/protocol/wlr-layer-shell-unstable-v1.xml
 	$(AM_V_GEN) $(wayland_scanner) private-code $(top_srcdir)/protocol/wlr-layer-shell-unstable-v1.xml $(top_srcdir)/protocol/wlr-layer-shell-unstable-v1-protocol.c
 	
-protocol/xdg-shell.h : $(top_srcdir)/protocol/xdg-shell-unstable-v6.xml
-	$(AM_V_GEN) $(wayland_scanner) server-header $(top_srcdir)/protocol/xdg-shell-unstable-v6.xml $(top_srcdir)/protocol/xdg-shell.h
+protocol/xdg-shell.h : $(top_srcdir)/protocol/xdg-shell.xml
+	$(AM_V_GEN) $(wayland_scanner) server-header $(top_srcdir)/protocol/xdg-shell.xml $(top_srcdir)/protocol/xdg-shell.h
 	
-protocol/xdg-shell.c : $(top_srcdir)/protocol/xdg-shell-unstable-v6.xml
-	$(AM_V_GEN) $(wayland_scanner) private-code $(top_srcdir)/protocol/xdg-shell-unstable-v6.xml $(top_srcdir)/protocol/xdg-shell.c
+protocol/xdg-shell.c : $(top_srcdir)/protocol/xdg-shell.xml
+	$(AM_V_GEN) $(wayland_scanner) private-code $(top_srcdir)/protocol/xdg-shell.xml $(top_srcdir)/protocol/xdg-shell.c
