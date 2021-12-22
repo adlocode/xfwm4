@@ -43,6 +43,20 @@
     <arg name = "handle" type = "object" interface = "zwlr_foreign_toplevel_handle_v1"/>
     <arg name = "seat" type = "object" interface = "wl_seat"/>
     </request>
+    
+  <request name = "set_tabwin">
+    <description summary = "set the window as an alt-tab window switcher">
+      Set the window as an alt-tab window switcher.
+    </description>
+    <arg name = "surface" type = "object" interface = "wl_surface"/>
+    <arg name = "output" type = "object" interface = "wl_output" allow-null = "true"/>
+  </request>
 
+  </interface>
+  
+  <interface name = "xfwm_shell_tabwin" version = "1">
+    <description summary = "alt-tab window switcher">
+      Alt-tab window switcher.
+    </description>
   </interface>
 </protocol>

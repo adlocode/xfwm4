@@ -38,6 +38,9 @@ struct _Shell
   struct wlr_layer_shell_v1 *layer_shell;
 
   struct wl_list focus_list;
+  
+  struct weston_view *tabwin_view;
+  struct weston_output *tabwin_output;
 
   struct {
 		struct wl_client *client;
@@ -1375,11 +1378,51 @@ tabwin_binding (struct weston_keyboard *keyboard,
   xfwm_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
   
   }
-
-/*static const struct xfwm_shell_interface xfway_desktop_shell_implementation =
+  
+static void tabwin_role_commit(struct weston_surface *weston_surface,
+                                      int32_t                sx,
+                                      int32_t                sy)
 {
+  Shell *shell = weston_surface->committed_private;
+  
+  if (!weston_view_is_mapped (shell->tabwin_view))
+      {
+          weston_layer_entry_insert (&shell->xfwm_display->overlay_layer.view_list,
+                                       &shell->tabwin_view->layer_link);
+          
+        shell->tabwin_view->is_mapped = true;
+      }  
+  
+  weston_view_set_position (shell->tabwin_view, shell->tabwin_output->width / 2 - shell->tabwin_view->surface->width / 2,
+                            shell->tabwin_output->height / 2 - shell->tabwin_view->surface->height / 2);
+  weston_view_update_transform (shell->tabwin_view);
+  weston_surface_damage (weston_surface);
+  weston_compositor_schedule_repaint (weston_surface->compositor);
+}
 
-};*/
+static void xfwm_shell_handle_set_tabwin (struct wl_client   *client,
+                                          struct wl_resource *resource,
+                                          struct wl_resource *surface_resource,
+                                          struct wl_resource *output_resource)
+{
+  Shell *shell = wl_resource_get_user_data (resource);
+  struct weston_surface *weston_surface = wl_resource_get_user_data (surface_resource);  
+  weston_log ("\nset tabwin window\n");
+  
+  shell->tabwin_view = weston_view_create (weston_surface);
+  
+  shell->tabwin_output = get_default_output (shell->xfwm_display->compositor);
+  
+  weston_surface->committed_private = shell;
+  weston_surface->committed = tabwin_role_commit;
+}
+
+static const struct xfwm_shell_interface xfway_desktop_shell_implementation =
+{
+  .focus = NULL,
+  .raise = NULL,
+  .set_tabwin = xfwm_shell_handle_set_tabwin,
+};
 
 static void
 unbind_desktop_shell(struct wl_resource *resource)
@@ -1403,7 +1446,7 @@ bind_desktop_shell(struct wl_client *client,
 
 	if (client == shell->child.client) {
 		wl_resource_set_implementation(resource,
-					       NULL,
+					       &xfway_desktop_shell_implementation,
 					       shell, unbind_desktop_shell);
 		shell->child.desktop_shell = resource;
 		return;
