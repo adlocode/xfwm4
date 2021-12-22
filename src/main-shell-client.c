@@ -165,7 +165,7 @@ setupLog (gboolean debug)
 }
 #endif /* DEBUG */
 
-static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
+static void shell_handle_tabwin (void *data, struct xfwm_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
 {
   ScreenInfo *screen_info = data;
   XfwmEvent *event;
@@ -187,17 +187,17 @@ static void shell_handle_tabwin (void *data, struct xfway_shell *shell, uint32_t
 
 }
 
-static void shell_handle_tabwin_next (void *data, struct xfway_shell *shell)
+static void shell_handle_tabwin_next (void *data, struct xfwm_shell *shell)
 {
 
 }
 
-static void shell_handle_tabwin_destroy (void *data, struct xfway_shell *shell)
+static void shell_handle_tabwin_destroy (void *data, struct xfwm_shell *shell)
 {
 
 }
 
-struct xfway_shell_listener shell_impl = {
+struct xfwm_shell_listener shell_impl = {
   shell_handle_tabwin,
   shell_handle_tabwin_next,
   shell_handle_tabwin_destroy,
@@ -418,14 +418,14 @@ void global_add (void               *data,
   ScreenInfo *screen_info = data;
   DisplayInfo *display_info = screen_info->display_info;
 
-  if (strcmp (interface, "xfway_shell") == 0)
+  if (strcmp (interface, "xfwm_shell") == 0)
     {
-      struct xfway_shell *shell = NULL;
+      struct xfwm_shell *shell = NULL;
       g_print ("xfway-shell\n");
-      shell = wl_registry_bind (registry, name, &xfway_shell_interface, 1);
-      screen_info->xfway_shell = shell;
+      shell = wl_registry_bind (registry, name, &xfwm_shell_interface, 1);
+      screen_info->xfwm_shell = shell;
 
-      xfway_shell_add_listener (shell, &shell_impl, screen_info);
+      xfwm_shell_add_listener (shell, &shell_impl, screen_info);
     }
   else if (strcmp(interface,
 			"zwlr_foreign_toplevel_manager_v1") == 0) {

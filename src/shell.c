@@ -1220,7 +1220,7 @@ switcher_next(struct switcher *switcher)
 		*minimized = view;
 	}*/
 
-  xfway_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
+  xfwm_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
 
 	wl_list_for_each(view, &switcher->shell->xfwm_display->surfaces_layer.view_list.link, layer_link.link) {
 		shsurf = get_shell_surface(view->surface);
@@ -1307,7 +1307,7 @@ switcher_destroy(struct switcher *switcher)
 	}
 	wl_array_release(&switcher->minimized_array);*/
 
-  xfway_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 0);
+  xfwm_shell_send_tabwin (switcher->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 0);
 
 	free(switcher);
 }
@@ -1372,11 +1372,11 @@ tabwin_binding (struct weston_keyboard *keyboard,
 	weston_keyboard_set_focus(keyboard, NULL);
 	switcher_next(switcher);
   
-  xfway_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
+  xfwm_shell_send_tabwin (shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
   
   }
 
-/*static const struct xfway_shell_interface xfway_desktop_shell_implementation =
+/*static const struct xfwm_shell_interface xfway_desktop_shell_implementation =
 {
 
 };*/
@@ -1396,7 +1396,7 @@ bind_desktop_shell(struct wl_client *client,
 	Shell *shell = data;
 	struct wl_resource *resource;
 
-	resource = wl_resource_create(client, &xfway_shell_interface,
+	resource = wl_resource_create(client, &xfwm_shell_interface,
 				      1, id);
 
   weston_log ("\nbind desktop shell\n");
@@ -1500,7 +1500,7 @@ void xfway_server_shell_init (xfwmDisplay *server, int argc, char *argv[])
   shell->layer_shell = wlr_layer_shell_v1_create (server->compositor->wl_display, server);
 
   wl_global_create (server->compositor->wl_display,
-                    &xfway_shell_interface, 1,
+                    &xfwm_shell_interface, 1,
                     shell, bind_desktop_shell);
 
   loop = wl_display_get_event_loop(server->compositor->wl_display);

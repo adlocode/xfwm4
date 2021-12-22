@@ -111,7 +111,7 @@ struct _ScreenInfo
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
     struct zwlr_layer_shell_v1 *layer_shell;
   
-    struct xfway_shell *xfway_shell;
+    struct xfwm_shell *xfwm_shell;
 
     /* Theme pixmaps and other params, per screen */
     GdkRGBA title_colors[2];

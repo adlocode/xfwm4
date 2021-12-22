@@ -272,7 +272,7 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->key_grabs = 0;
     screen_info->pointer_grabs = 0;
   
-    screen_info->xfway_shell = NULL;
+    screen_info->xfwm_shell = NULL;
 
   if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
     {

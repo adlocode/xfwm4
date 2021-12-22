@@ -1,6 +1,6 @@
 <protocol name="xfway">
 
-  <interface name="xfway_shell" version="1">
+  <interface name="xfwm_shell" version="1">
     <description summary="create desktop widgets and helpers">
       Traditional user interfaces can rely on this interface to define the
       foundations of typical desktops. Currently it's possible to set up

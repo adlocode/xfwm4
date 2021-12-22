@@ -602,7 +602,7 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
                 }
               else
                 {
-                  xfway_shell_focus (screen_info->xfway_shell, c->toplevel_handle, screen_info->display_info->wl_seat);
+                  xfwm_shell_focus (screen_info->xfwm_shell, c->toplevel_handle, screen_info->display_info->wl_seat);
                 }
             }
             if (myDisplayErrorTrapPop (screen_info->display_info) != Success)
