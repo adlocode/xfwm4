@@ -1387,14 +1387,25 @@ static void tabwin_role_commit(struct weston_surface *weston_surface,
   
   if (!weston_view_is_mapped (shell->tabwin_view))
       {
-          weston_layer_entry_insert (&shell->xfwm_display->overlay_layer.view_list,
-                                       &shell->tabwin_view->layer_link);
+        weston_layer_entry_insert (&shell->xfwm_display->overlay_layer.view_list,
+                                     &shell->tabwin_view->layer_link);
           
         shell->tabwin_view->is_mapped = true;
       }  
   
-  weston_view_set_position (shell->tabwin_view, shell->tabwin_output->width / 2 - shell->tabwin_view->surface->width / 2,
-                            shell->tabwin_output->height / 2 - shell->tabwin_view->surface->height / 2);
+  /*if (shell->tabwin_view->output)
+    {
+      shell->tabwin_view->output = shell->tabwin_output;
+    }*/
+  if (shell->tabwin_view->output == NULL)
+    {
+      weston_view_update_transform (shell->tabwin_view);
+      //shell->tabwin_output = shell->tabwin_view->output;
+    }  
+  
+  
+  weston_view_set_position (shell->tabwin_view, shell->tabwin_view->output->width / 2 - shell->tabwin_view->surface->width / 2,
+                            shell->tabwin_view->output->height / 2 - shell->tabwin_view->surface->height / 2);
   weston_view_update_transform (shell->tabwin_view);
   weston_surface_damage (weston_surface);
   weston_compositor_schedule_repaint (weston_surface->compositor);
@@ -1411,7 +1422,14 @@ static void xfwm_shell_handle_set_tabwin (struct wl_client   *client,
   
   shell->tabwin_view = weston_view_create (weston_surface);
   
-  shell->tabwin_output = get_default_output (shell->xfwm_display->compositor);
+  if (output_resource != NULL)
+    {
+      shell->tabwin_output = wl_resource_get_user_data (output_resource);
+    }
+  else
+    {
+      shell->tabwin_output = NULL;
+    }
   
   weston_surface->committed_private = shell;
   weston_surface->committed = tabwin_role_commit;
