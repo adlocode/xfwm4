@@ -812,12 +812,7 @@ tabwinCreateWidget (Tabwin *tabwin, ScreenInfo *screen_info, gint monitor_num)
     {
       GdkWindow *w = gtk_widget_get_window (tabwin_widget);
       gdk_wayland_window_set_use_custom_surface (w);
-      surface = gdk_wayland_window_get_wl_surface (w);
-      /*layer_surface = zwlr_layer_shell_v1_get_layer_surface (screen_info->layer_shell,
-                                                             surface,
-                                                             screen_info->wl_output,
-                                                             ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
-                                                             "xfwm4");*/
+      surface = gdk_wayland_window_get_wl_surface (w);      
       xfwm_shell_set_tabwin (screen_info->xfwm_shell, surface, screen_info->wl_output);
     }
 
