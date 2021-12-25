@@ -550,6 +550,9 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
     Client *c2;
 
     TRACE ("entering");
+  
+  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+  {
 
     c2 = NULL;
     if ((c) && !(flags & FOCUS_IGNORE_MODAL))
@@ -595,15 +598,9 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
                 XSetInputFocus (myScreenGetXDisplay (screen_info), c->frame, RevertToPointerRoot, timestamp);
             }
             else
-            {
-              if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
-                {
-                XSetInputFocus (myScreenGetXDisplay (screen_info), c->window, RevertToPointerRoot, timestamp);
-                }
-              else
-                {
-                  xfwm_shell_focus (screen_info->xfwm_shell, c->toplevel_handle, screen_info->display_info->wl_seat);
-                }
+            {              
+                XSetInputFocus (myScreenGetXDisplay (screen_info), c->window, RevertToPointerRoot, timestamp);                
+              
             }
             if (myDisplayErrorTrapPop (screen_info->display_info) != Success)
             {
@@ -637,6 +634,11 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
         client_focus = NULL;
         clientFocusNone (screen_info, c2, timestamp);
         clientClearDelayedFocus ();
+    }
+  }
+  else
+    {
+        xfwm_shell_window_focus (screen_info->xfwm_shell, c->toplevel_handle, screen_info->display_info->wl_seat);
     }
 }
 

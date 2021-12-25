@@ -78,6 +78,9 @@ struct _CWindowWayland
   struct wlr_foreign_toplevel_handle_v1 *toplevel_handle;
   struct wl_listener toplevel_handle_request_activate;
   struct wl_listener toplevel_handle_request_close;
+  
+  struct wl_listener shell_window_request_focus;
+  struct wl_listener shell_window_request_raise;
 
   struct wl_listener desktop_surface_metadata_signal;
 
@@ -118,6 +121,11 @@ weston_window_switcher_module_init (struct weston_compositor *compositor,
 void
 _weston_window_switcher_window_create (struct weston_window_switcher *switcher,
                                        struct weston_surface         *surface);
+
+static void xfwm_shell_handle_window_focus (struct wl_listener *listener,
+                                            void *data);
+static void xfwm_shell_handle_window_raise (struct wl_listener *listener,
+                                            void *data);
 
 void
 activate (Shell *shell,
@@ -377,6 +385,12 @@ void surface_added (struct weston_desktop_surface *desktop_surface,
     handle_toplevel_handle_request_close;
   wl_signal_add (&self->toplevel_handle->events.request_close,
                  &self->toplevel_handle_request_close);
+  self->shell_window_request_focus.notify = xfwm_shell_handle_window_focus;
+  wl_signal_add (&self->toplevel_handle->events.shell_request_focus,
+                 &self->shell_window_request_focus);
+  self->shell_window_request_raise.notify = xfwm_shell_handle_window_raise;
+  wl_signal_add (&self->toplevel_handle->events.shell_request_raise,
+                 &self->shell_window_request_raise);
 
   self->desktop_surface_metadata_signal.notify = handle_desktop_surface_metadata_signal;
   weston_desktop_surface_add_metadata_listener (desktop_surface,
@@ -1287,11 +1301,11 @@ switcher_destroy(struct switcher *switcher)
 		weston_surface_damage(view->surface);
 	}
 
-	if (switcher->current) {
+	/*if (switcher->current) {
 		activate(switcher->shell, switcher->current,
 			 keyboard->seat,
 			 WESTON_ACTIVATE_FLAG_CONFIGURE);
-	}
+	}*/
 
 	wl_list_remove(&switcher->listener.link);
 	weston_keyboard_end_grab(keyboard);
@@ -1379,6 +1393,72 @@ tabwin_binding (struct weston_keyboard *keyboard,
   
   }
   
+static void xfwm_shell_send_focus_signal (struct wl_client   *client,
+                                            struct wl_resource *shell_resource,
+                                            struct wl_resource *handle_resource,
+                                            struct wl_resource *seat_resource)
+{
+  struct wlr_foreign_toplevel_handle_v1 *toplevel;
+  struct weston_seat *seat;
+  CWindowWayland *cw;
+  Shell *shell;
+  
+  toplevel = wl_resource_get_user_data (handle_resource);
+  seat = wl_resource_get_user_data (seat_resource);
+  shell = wl_resource_get_user_data (shell_resource);
+  
+  struct xfwm_shell_window_focus_event event = {
+		.toplevel = toplevel,
+		.seat = seat,
+	};
+	wlr_signal_emit_safe(&toplevel->events.shell_request_focus, &event);
+  
+}
+  
+static void xfwm_shell_send_raise_signal (struct wl_client   *client,
+                                            struct wl_resource *shell_resource,
+                                            struct wl_resource *handle_resource,
+                                            struct wl_resource *seat_resource)
+{
+  struct wlr_foreign_toplevel_handle_v1 *toplevel;
+  struct weston_seat *seat;
+  CWindowWayland *cw;
+  Shell *shell;
+  
+  toplevel = wl_resource_get_user_data (handle_resource);
+  seat = wl_resource_get_user_data (seat_resource);
+  shell = wl_resource_get_user_data (shell_resource);
+  
+  struct xfwm_shell_window_raise_event event = {
+		.toplevel = toplevel,
+		.seat = seat,
+	};
+	wlr_signal_emit_safe(&toplevel->events.shell_request_raise, &event);
+  
+}
+  
+static void xfwm_shell_handle_window_focus (struct wl_listener *listener,
+                                            void *data)
+{
+  CWindowWayland *cw;
+  
+  struct xfwm_shell_window_focus_event *event = data;
+  cw = wl_container_of (listener, cw, shell_window_request_focus);  
+  
+  shell_surface_focus (cw->shell, cw->view, event->seat, 0);
+}
+  
+static void xfwm_shell_handle_window_raise (struct wl_listener *listener,
+                                            void *data)
+{
+  CWindowWayland *cw;
+  
+  struct xfwm_shell_window_raise_event *event = data;
+  cw = wl_container_of (listener, cw, shell_window_request_raise);  
+  
+  shell_surface_raise (cw->shell, cw->view, event->seat, 0);
+}
+  
 static void tabwin_role_commit(struct weston_surface *weston_surface,
                                       int32_t                sx,
                                       int32_t                sy)
@@ -1437,8 +1517,8 @@ static void xfwm_shell_handle_set_tabwin (struct wl_client   *client,
 
 static const struct xfwm_shell_interface xfway_desktop_shell_implementation =
 {
-  .focus = NULL,
-  .raise = NULL,
+  .window_focus = xfwm_shell_send_focus_signal,
+  .window_raise = xfwm_shell_send_raise_signal,
   .set_tabwin = xfwm_shell_handle_set_tabwin,
 };
 

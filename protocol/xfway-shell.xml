@@ -28,7 +28,7 @@
     </description>
   </event>
   
-  <request name = "focus">
+  <request name = "window_focus">
     <description summary = "focus window">
       Focus the window
     </description>
@@ -36,7 +36,7 @@
     <arg name = "seat" type = "object" interface = "wl_seat"/>
     </request>
     
-  <request name = "raise">
+  <request name = "window_raise">
     <description summary = "raise window">
       Focus the window
     </description>

@@ -402,6 +402,12 @@ clientRaise (Client * c, Window wsibling)
 
     screen_info = c->screen_info;
     display_info = screen_info->display_info;
+  
+    if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
+      xfwm_shell_window_raise (screen_info->xfwm_shell, c->toplevel_handle, display_info->wl_seat);
+      return;
+    }
 
     if (c == screen_info->last_raise)
     {

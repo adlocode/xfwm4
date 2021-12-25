@@ -212,6 +212,9 @@ clientCycleActivate (Client *c)
     display_info = screen_info->display_info;
     workspace = c->win_workspace;
     focused = clientGetFocus ();
+  
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
 
     if ((focused) && (c != focused))
     {
@@ -226,6 +229,7 @@ clientCycleActivate (Client *c)
     if (workspace != screen_info->current_ws)
     {
         workspaceSwitch (screen_info, workspace, c, FALSE, myDisplayGetCurrentTime (display_info));
+    }
     }
 
     clientCycleFocusAndRaise (c);
@@ -597,13 +601,13 @@ clientCycle (Client * c, XfwmEventKey *event)
     }
 
     myScreenUngrabKeyboard (screen_info, myDisplayGetCurrentTime (display_info));
-    
+    }
 
     if (c)
     {
         clientCycleActivate (c);
     }
-     }
+     
   g_print ("exit client cycle\n");
 }
 

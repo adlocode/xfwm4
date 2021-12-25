@@ -482,6 +482,8 @@ wlr_foreign_toplevel_handle_v1_create(
 	wl_signal_init(&toplevel->events.request_fullscreen);
 	wl_signal_init(&toplevel->events.request_close);
 	wl_signal_init(&toplevel->events.set_rectangle);
+  wl_signal_init(&toplevel->events.shell_request_focus);
+  wl_signal_init(&toplevel->events.shell_request_raise);
 	wl_signal_init(&toplevel->events.destroy);
 
 	struct wl_resource *manager_resource, *tmp;

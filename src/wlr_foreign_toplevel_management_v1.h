@@ -67,6 +67,9 @@ struct wlr_foreign_toplevel_handle_v1 {
 		//wlr_foreign_toplevel_handle_v1_set_rectangle_event
 		struct wl_signal set_rectangle;
 		struct wl_signal destroy;
+    
+    struct wl_signal shell_request_focus;
+    struct wl_signal shell_request_raise;
 	} events;
 
 	void *data;
@@ -97,6 +100,16 @@ struct wlr_foreign_toplevel_handle_v1_set_rectangle_event {
 	struct wlr_foreign_toplevel_handle_v1 *toplevel;
 	struct wlr_surface *surface;
 	int32_t x, y, width, height;
+};
+
+struct xfwm_shell_window_focus_event {
+	struct wlr_foreign_toplevel_handle_v1 *toplevel;
+	struct wlr_seat *seat;
+};
+
+struct xfwm_shell_window_raise_event {
+	struct wlr_foreign_toplevel_handle_v1 *toplevel;
+	struct wlr_seat *seat;
 };
 
 struct wlr_foreign_toplevel_manager_v1 *wlr_foreign_toplevel_manager_v1_create(
