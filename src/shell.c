@@ -701,11 +701,14 @@ shell_surface_focus (Shell              *shell,
       //if (state->keyboard_focus != view->surface)
         //{
       prev_cw = get_shell_surface (state->keyboard_focus);
-      if (prev_cw->toplevel_handle && prev_cw->surface != cw->surface)
-            {
-          wlr_foreign_toplevel_handle_v1_set_activated (prev_cw->toplevel_handle, 0);
-          weston_log ("deactivate\n");
-            }
+      if (prev_cw)
+        {
+           if (prev_cw->toplevel_handle && prev_cw->surface != cw->surface)
+           {
+             wlr_foreign_toplevel_handle_v1_set_activated (prev_cw->toplevel_handle, 0);
+             weston_log ("deactivate\n");
+           }
+        }
       
     //}
     }
