@@ -312,6 +312,9 @@ clientRaiseInternal (Client * c, Client * client_sibling)
         /* There will be no window on top of the raised window, so place it at the end of list */
         screen_info->windows_stack = g_list_append (screen_info->windows_stack, c);
     }
+  
+    if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
+    {
     /* Now, look for transients, transients of transients, etc. */
     for (l1 = windows_stack_copy; l1; l1 = g_list_next (l1))
     {
@@ -368,6 +371,8 @@ clientRaiseInternal (Client * c, Client * client_sibling)
             }
         }
     }
+      
+    }
 
     if (transients)
     {
@@ -401,13 +406,7 @@ clientRaise (Client * c, Window wsibling)
     }
 
     screen_info = c->screen_info;
-    display_info = screen_info->display_info;
-  
-    if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
-    {
-      xfwm_shell_window_raise (screen_info->xfwm_shell, c->toplevel_handle, display_info->wl_seat);
-      return;
-    }
+    display_info = screen_info->display_info;    
 
     if (c == screen_info->last_raise)
     {
@@ -459,8 +458,15 @@ clientRaise (Client * c, Window wsibling)
     /* Now, screen_info->windows_stack contains the correct window stack
        We still need to tell the X Server to reflect the changes
      */
-    clientApplyStackList (screen_info);
-    clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST_STACKING], screen_info->windows_stack);
+  if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
+      xfwm_shell_window_raise (screen_info->xfwm_shell, c->toplevel_handle, display_info->wl_seat);
+    }
+  else
+    {
+      clientApplyStackList (screen_info);
+      clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST_STACKING], screen_info->windows_stack);
+    }
     screen_info->last_raise = c;
 }
 

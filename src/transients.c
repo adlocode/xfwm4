@@ -331,14 +331,20 @@ clientGetTransientFor (Client * c)
     Client *first_parent;
     GList *l1, *l2;
     GList *parents;
+  
+    screen_info = c->screen_info;
+  
+    if (GDK_IS_WAYLAND_DISPLAY (screen_info->display_info->gdisplay))
+    {
+      return c;
+    }
 
     g_return_val_if_fail (c != NULL, NULL);
     TRACE ("client \"%s\" (0x%lx)", c->name, c->window);
 
     first_parent = c;
-    parents = g_list_append (NULL, c);
-
-    screen_info = c->screen_info;
+    parents = g_list_append (NULL, c);    
+  
     for (l1 = g_list_last(screen_info->windows_stack); l1; l1 = g_list_previous (l1))
     {
         Client *c2 = (Client *) l1->data;
