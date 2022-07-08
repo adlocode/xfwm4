@@ -1,0 +1,2 @@
+option('xwayland', type: 'boolean', value: true,
+	description: 'Whether Xwayland support is enabled')
