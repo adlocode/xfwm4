@@ -33,7 +33,7 @@ From source:
     % make
     % make install
     
-    Compiling wlroots compositor:
+Compiling wlroots compositor:
     
     % meson build
     % ninja -C build
