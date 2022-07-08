@@ -32,6 +32,11 @@ From source:
     % ./autogen.sh
     % make
     % make install
+    
+    Compiling wlroots compositor:
+    
+    % meson build
+    % ninja -C build
 
 From release tarball:
 
