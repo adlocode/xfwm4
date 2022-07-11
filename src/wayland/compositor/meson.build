@@ -16,11 +16,13 @@ hopalong_sources = [
   'hopalong-shell.c',
   'hopalong-layer-shell.c',
   'hopalong-keybinding.c',
+  'os-compatibility.c',
   'hopalong-main.c',
 ]
 
 hopalong_dependencies = [
   server_protos,
+  xfwm_server_protos,
   wayland_server,
   cairo,
   pangocairo,
@@ -38,5 +40,6 @@ endif
 hopalong_exe = executable('hopalong',
   hopalong_sources,
   dependencies: hopalong_dependencies,
+  include_directories: incdir,
   install: true
 )

@@ -39,7 +39,7 @@
 #include <X11/extensions/shape.h>
 
 #include <wayland-client.h>
-#include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+#include "protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
 
 #include <glib.h>
 #include <gtk/gtk.h>

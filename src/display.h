@@ -63,6 +63,7 @@
 
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
+#include <stdbool.h>
 
 #include <gtk/gtk.h>
 #include <glib.h>

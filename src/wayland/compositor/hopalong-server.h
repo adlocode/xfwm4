@@ -102,6 +102,15 @@ struct hopalong_server {
 	struct wl_listener new_layer_surface;
 
 	struct wl_list keybindings;
+  
+  struct {
+		struct wl_client *client;
+		struct wl_resource *desktop_shell;
+		struct wl_listener client_destroy_listener;
+
+		unsigned deathcount;
+		struct timespec deathstamp;
+	} child;
 };
 
 struct hopalong_server_options {
