@@ -165,6 +165,16 @@ setupLog (gboolean debug)
 }
 #endif /* DEBUG */
 
+static void shell_handle_toplevel (void *data, struct xfwm_shell *shell, struct xfwm_shell_window *toplevel)
+{
+  
+}
+
+static void shell_handle_finished (void *data, struct xfwm_shell *shell)
+{
+  
+}
+
 static void shell_handle_tabwin (void *data, struct xfwm_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
 {
   ScreenInfo *screen_info = data;
@@ -198,6 +208,8 @@ static void shell_handle_tabwin_destroy (void *data, struct xfwm_shell *shell)
 }
 
 struct xfwm_shell_listener shell_impl = {
+  shell_handle_toplevel,
+  shell_handle_finished,
   shell_handle_tabwin,
   shell_handle_tabwin_next,
   shell_handle_tabwin_destroy,

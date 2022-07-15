@@ -18,6 +18,7 @@ hopalong_sources = [
   'hopalong-keybinding.c',
   'os-compatibility.c',
   'hopalong-main.c',
+  'xfwm-shell.c'
 ]
 
 hopalong_dependencies = [

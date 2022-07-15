@@ -460,7 +460,7 @@ clientRaise (Client * c, Window wsibling)
      */
   if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
     {
-      xfwm_shell_window_raise (screen_info->xfwm_shell, c->toplevel_handle, display_info->wl_seat);
+      xfwm_shell_window_raise (NULL, display_info->wl_seat);
     }
   else
     {

@@ -44,6 +44,8 @@
 #include "hopalong-style.h"
 #include "hopalong-layer-shell.h"
 
+#include "xfwm-shell.h"
+
 enum hopalong_cursor_mode {
 	HOPALONG_CURSOR_PASSTHROUGH,
 	HOPALONG_CURSOR_MOVE,
@@ -101,16 +103,9 @@ struct hopalong_server {
 	struct wlr_layer_shell_v1 *wlr_layer_shell;
 	struct wl_listener new_layer_surface;
 
-	struct wl_list keybindings;
+	struct wl_list keybindings;  
   
-  struct {
-		struct wl_client *client;
-		struct wl_resource *desktop_shell;
-		struct wl_listener client_destroy_listener;
-
-		unsigned deathcount;
-		struct timespec deathstamp;
-	} child;
+  struct xfwm_shell *shell;
 };
 
 struct hopalong_server_options {
