@@ -18,6 +18,7 @@ hopalong_sources = [
   'hopalong-keybinding.c',
   'os-compatibility.c',
   'hopalong-main.c',
+  top_srcdir + '/util/signal.c',
   'xfwm-shell.c'
 ]
 
