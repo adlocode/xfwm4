@@ -304,7 +304,8 @@ hopalong_xdg_shell_setup(struct hopalong_server *server)
 	server->new_xdg_surface.notify = hopalong_xdg_new_surface;
 	wl_signal_add(&server->xdg_shell->events.new_surface, &server->new_xdg_surface);
 
-	hopalong_decoration_setup(server);
+  //This code commented out as a workaround to a bug
+	//hopalong_decoration_setup(server);
 }
 
 /*
