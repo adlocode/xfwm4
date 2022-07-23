@@ -24,6 +24,7 @@
 #include <wlr/types/wlr_export_dmabuf_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
+#include <wlr/backend/wayland.h>
 
 static void
 hopalong_server_new_output(struct wl_listener *listener, void *data)
@@ -129,6 +130,10 @@ hopalong_server_initialize(struct hopalong_server *server, const struct hopalong
 	wlr_data_control_manager_v1_create(server->display);
 	wlr_gamma_control_manager_v1_create(server->display);
 	wlr_primary_selection_v1_device_manager_create(server->display);
+  
+  server->is_windowed = FALSE;
+  if (getenv ("WAYLAND_DISPLAY") || getenv ("WAYLAND_SOCKET"))
+    server->is_windowed = TRUE;
 
 	/* set up style */
 	if (options->style_name != NULL)

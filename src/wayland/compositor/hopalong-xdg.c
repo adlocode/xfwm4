@@ -15,6 +15,9 @@
 #include "hopalong-xdg.h"
 #include "hopalong-server.h"
 #include "hopalong-decoration.h"
+#include "xfwm-shell.h"
+
+static struct hopalong_view *active_view = NULL;
 
 static void
 hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
@@ -22,6 +25,10 @@ hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
 	return_if_fail(listener != NULL);
 
 	struct hopalong_view *view = wl_container_of(listener, view, map);
+  
+  wlr_log (WLR_INFO, "\nmap\n");
+  
+  view->shell_window = xfwm_shell_window_create (view->server->shell);
 
 	hopalong_view_focus(view, view->xdg_surface->surface);
 }
@@ -32,6 +39,9 @@ hopalong_xdg_surface_unmap(struct wl_listener *listener, void *data)
 	return_if_fail(listener != NULL);
 
 	struct hopalong_view *view = wl_container_of(listener, view, unmap);
+  
+  xfwm_shell_window_destroy (view->shell_window);
+  
 	hopalong_view_unmap(view);
 }
 
@@ -41,6 +51,9 @@ hopalong_xdg_surface_destroy(struct wl_listener *listener, void *data)
 	return_if_fail(listener != NULL);
 
 	struct hopalong_view *view = wl_container_of(listener, view, destroy);
+  
+  if (active_view == view)
+    active_view = NULL;
 
 	wl_list_remove(&view->map.link);
 	wl_list_remove(&view->unmap.link);
@@ -58,6 +71,17 @@ hopalong_xdg_toplevel_set_title(struct wl_listener *listener, void *data)
 {
 	struct hopalong_view *view = wl_container_of(listener, view, set_title);
 	view->title_dirty = true;
+  
+  char title[4096] = {};
+
+	const char *title_data = hopalong_view_getprop(view, HOPALONG_VIEW_TITLE);
+	if (title_data == NULL)
+		title_data = hopalong_view_getprop(view, HOPALONG_VIEW_APP_ID);
+	if (title_data != NULL)
+		strlcpy(title, title_data, sizeof title);
+  
+  if (view->shell_window)
+    xfwm_shell_window_set_title (view->shell_window, title);
 }
 
 static void
@@ -167,6 +191,13 @@ static void
 hopalong_xdg_toplevel_set_activated(struct hopalong_view *view, bool activated)
 {
 	wlr_xdg_toplevel_set_activated(view->xdg_surface, activated);
+  
+  if (active_view)
+    xfwm_shell_window_set_activated (active_view->shell_window, false);
+  
+  xfwm_shell_window_set_activated (view->shell_window, activated);
+  
+  active_view = view;
 }
 
 static bool
@@ -237,6 +268,8 @@ hopalong_xdg_surface_commit(struct wl_listener *listener, void *data)
 	view->using_csd = false;
 	if (view->xdg_surface->current.geometry.x || view->xdg_surface->current.geometry.y)
 		view->using_csd = true;
+  
+  view->using_csd = true;
 }
 
 static void
@@ -256,6 +289,8 @@ hopalong_xdg_new_surface(struct wl_listener *listener, void *data)
 	view->xdg_surface = xdg_surface;
 	view->ops = &hopalong_xdg_view_ops;
 	view->layer = HOPALONG_LAYER_MIDDLE;
+  
+  view->shell_window = NULL;
 
 	view->x = view->y = 64;
 

@@ -1,20 +1,40 @@
 /*
  * Hopalong - a friendly Wayland compositor
  * Copyright (c) 2020 Ariadne Conill <ariadne@dereferenced.org>
+ * 
+ * Copyright (C) 2018 - 2022 adlo
  *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * This software is provided 'as is' and without any warranty, express or
- * implied.  In no event shall the authors be liable for any damages arising
- * from the use of this software.
- */
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */ 
 
 #include <stdlib.h>
 #include "hopalong-seat.h"
 #include "hopalong-server.h"
 #include "hopalong-keybinding.h"
+#include "protocol/xfway-shell-protocol.h"
+#include <wlr/backend/wayland.h>
+#include <wlr/backend/drm.h>
+#include <wlr/backend/x11.h>
+#include <linux/input.h>
+
+#define XFWM_MOD_SHIFT     0x0001
+#define XFWM_MOD_CONTROL   0x0002
+#define XFWM_MOD_ALT       0x0004
+
+bool cycling = FALSE;
+
 
 static void
 keyboard_handle_modifiers(struct wl_listener *listener, void *data)
@@ -38,15 +58,55 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
 	struct hopalong_server *server = keyboard->server;
 	struct wlr_event_keyboard_key *event = data;
 	struct wlr_seat *seat = server->seat;
+  xkb_keysym_t tab_key;
 
         /* Translate libinput keycode -> xkbcommon */
 	uint32_t keycode = event->keycode + 8;
+  
+  if (server->is_windowed)
+    tab_key = XKB_KEY_a;
+  else
+    tab_key = XKB_KEY_Tab;
 
 	const xkb_keysym_t *syms;
 	int nsyms = xkb_state_key_get_syms(keyboard->device->keyboard->xkb_state, keycode, &syms);
 
 	uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->device->keyboard);
 	bool handled = false;
+    
+  if (server->shell->child.desktop_shell)
+  {
+   for (int i = 0; i < nsyms; i++)
+   {
+   if (syms[i] == tab_key && modifiers == WLR_MODIFIER_ALT)
+    {
+        if ((enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
+	      {
+          zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
+                                  KEY_TAB,
+                                  XFWM_MOD_ALT,
+                                  (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);
+        
+    
+          cycling = TRUE;
+        }
+    }
+    
+      else if ((enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_RELEASED
+               && syms[i] == XKB_KEY_Alt_L)
+        {
+          if (cycling)
+            {
+             zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
+                                     KEY_TAB,
+                                     XFWM_MOD_ALT,
+                                     (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);
+              cycling = FALSE;
+            }
+      
+       }   
+   }
+  }
 
 	if ((enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
 	{

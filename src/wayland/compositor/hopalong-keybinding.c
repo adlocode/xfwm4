@@ -13,6 +13,12 @@
 
 #include "hopalong-server.h"
 #include "hopalong-keybinding.h"
+#include <linux/input.h>
+#include "protocol/xfway-shell-protocol.h"
+
+#define XFWM_MOD_SHIFT     0x0001
+#define XFWM_MOD_CONTROL   0x0002
+#define XFWM_MOD_ALT       0x0004
 
 #if 0
 
@@ -73,6 +79,11 @@ switch_activity(struct hopalong_server *server, uint32_t modifiers, xkb_keysym_t
 	struct hopalong_view *next_view = backwards ? last_view : wl_container_of(current_view->mapped_link.next, next_view, mapped_link);
 
 	return_if_fail(next_view != NULL);
+  
+  wlr_log (WLR_INFO, "\nswitch activity\n");
+  
+  //if (server->shell->child.desktop_shell)
+    //zxfwm_shell_send_tabwin (server->shell->child.desktop_shell, KEY_TAB, XFWM_MOD_ALT, 1);
 
 	hopalong_view_focus(next_view, hopalong_view_get_surface(next_view));
 
@@ -130,6 +141,8 @@ hopalong_keybinding_setup(struct hopalong_server *server)
 
 	hopalong_keybinding_add(server, WLR_MODIFIER_SHIFT | WLR_MODIFIER_ALT, XKB_KEY_Tab, switch_activity);
 	hopalong_keybinding_add(server, WLR_MODIFIER_ALT, XKB_KEY_Tab, switch_activity);
+  
+  hopalong_keybinding_add(server, WLR_MODIFIER_ALT, XKB_KEY_a, switch_activity);
 
 	hopalong_keybinding_add(server, WLR_MODIFIER_SHIFT | WLR_MODIFIER_ALT, XKB_KEY_ISO_Left_Tab, switch_activity);
 	hopalong_keybinding_add(server, WLR_MODIFIER_ALT, XKB_KEY_ISO_Left_Tab, switch_activity);

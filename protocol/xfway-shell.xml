@@ -1,6 +1,6 @@
 <protocol name="xfway">
 
-  <interface name="xfwm_shell" version="1">
+  <interface name="zxfwm_shell" version="1">
     <description summary="create desktop widgets and helpers">
       Traditional user interfaces can rely on this interface to define the
       foundations of typical desktops. Currently it's possible to set up
@@ -17,7 +17,7 @@
         be sent immediately after this event via the corresponding events in
         zwlr_foreign_toplevel_handle_v1.
       </description>
-      <arg name="toplevel" type="new_id" interface="xfwm_shell_window"/>
+      <arg name="toplevel" type="new_id" interface="zxfwm_shell_window"/>
     </event>
 
     <request name="stop">
@@ -71,7 +71,7 @@
 
   </interface>
   
-  <interface name = "xfwm_shell_window" version = "1">
+  <interface name = "zxfwm_shell_window" version = "1">
     <description summary = "an opened toplevel">
       An xfwm_shell_window object represents an opened toplevel
       window. Each app may have multiple opened toplevels.

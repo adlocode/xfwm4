@@ -810,10 +810,10 @@ tabwinCreateWidget (Tabwin *tabwin, ScreenInfo *screen_info, gint monitor_num)
     
     if (GDK_IS_WAYLAND_DISPLAY (screen_info->display_info->gdisplay))
     {
-      GdkWindow *w = gtk_widget_get_window (tabwin_widget);
+      /*GdkWindow *w = gtk_widget_get_window (tabwin_widget);
       gdk_wayland_window_set_use_custom_surface (w);
       surface = gdk_wayland_window_get_wl_surface (w);      
-      xfwm_shell_set_tabwin (screen_info->xfwm_shell, surface, screen_info->wl_output);
+      zxfwm_shell_set_tabwin (screen_info->xfwm_shell, surface, screen_info->wl_output);*/
     }
 
     if (tabwin->icon_list == NULL)

@@ -40,6 +40,7 @@
 
 #include <wayland-client.h>
 #include "protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
+#include "protocol/xfway-shell-client-protocol.h"
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -282,7 +283,7 @@ struct _Client
     ScreenInfo *screen_info;
 
     Window window;
-    struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle;
+    struct zxfwm_shell_window *shell_window;
     Window frame;
     Window transient_for;
     Window user_time_win;
@@ -412,7 +413,7 @@ Client                  *clientFrame                            (DisplayInfo *,
 void                     clientUnframe                          (Client *,
                                                                  gboolean);
 Client                   *clientFrameWayland                    (ScreenInfo *,
-                                                                 struct zwlr_foreign_toplevel_handle_v1 *, 
+                                                                 struct zxfwm_shell_window *, 
                                                                  gboolean);
 void                     clientUnframeWayland                   (Client *, 
                                                                  gboolean);

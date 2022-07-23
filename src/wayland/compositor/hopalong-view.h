@@ -33,6 +33,7 @@
 #include <xkbcommon/xkbcommon.h>
 
 #include "hopalong-style.h"
+#include "xfwm-shell.h"
 
 struct hopalong_output;
 struct hopalong_server;
@@ -123,6 +124,8 @@ struct hopalong_view {
 	bool using_csd;
 	bool activated;
 	bool hide_title_bar;
+  
+  struct xfwm_shell_window *shell_window;
 };
 
 struct hopalong_generated_textures {

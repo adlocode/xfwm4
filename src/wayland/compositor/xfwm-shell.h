@@ -120,6 +120,13 @@ struct xfwm_shell_window {
 	void *data;
 };
 
+enum xfwm_shell_window_state {
+	XFWM_SHELL_WINDOW_STATE_MAXIMIZED = (1 << 0),
+	XFWM_SHELL_WINDOW_STATE_MINIMIZED = (1 << 1),
+	XFWM_SHELL_WINDOW_STATE_ACTIVATED = (1 << 2),
+	XFWM_SHELL_WINDOW_STATE_FULLSCREEN = (1 << 3),
+};
+
 struct xfwm_shell_window_maximized_event {
 	struct xfwm_shell_window *toplevel;
 	bool maximized;

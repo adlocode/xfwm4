@@ -165,22 +165,105 @@ setupLog (gboolean debug)
 }
 #endif /* DEBUG */
 
-static void shell_handle_toplevel (void *data, struct xfwm_shell *shell, struct xfwm_shell_window *toplevel)
+static void shell_window_handle_title(void *data,
+		struct zxfwm_shell_window *shell_window,
+		const char *title)
+{
+  Client *c = data;
+  if (c->name)
+    g_free (c->name);
+  c->name = g_strdup (title);
+  g_print (c->name);
+}
+
+static void shell_window_handle_app_id(void *data,
+		struct zxfwm_shell_window *shell_window,
+		const char *app_id)
+{
+
+}
+
+static uint32_t xfwm_array_to_state(struct wl_array *array) {
+	uint32_t state = 0;
+	uint32_t *entry;
+	wl_array_for_each(entry, array) {
+		if (*entry == ZXFWM_SHELL_WINDOW_STATE_MAXIMIZED)
+			state |= TOPLEVEL_STATE_MAXIMIZED;
+		if (*entry == ZXFWM_SHELL_WINDOW_STATE_MINIMIZED)
+			state |= TOPLEVEL_STATE_MINIMIZED;
+		if (*entry == ZXFWM_SHELL_WINDOW_STATE_ACTIVATED)
+			state |= TOPLEVEL_STATE_ACTIVATED;
+		if (*entry == ZXFWM_SHELL_WINDOW_STATE_FULLSCREEN)
+			state |= TOPLEVEL_STATE_FULLSCREEN;
+	}
+
+	return state;
+}
+
+static void shell_window_handle_state(void *data,
+		struct zxfwm_shell_window *shell_window,
+		struct wl_array *state) {
+	Client *c = data;
+	uint32_t s = xfwm_array_to_state(state);
+
+  if (s & TOPLEVEL_STATE_ACTIVATED){
+    clientUpdateFocus (c->screen_info, c, NO_FOCUS_FLAG);
+    g_print ("activate\n");
+  }
+}
+
+static void shell_window_handle_done(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+{
+
+}
+
+static void shell_window_handle_closed(void *data,
+		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+{
+  Client *c = data;
+
+  //if (c->name)
+    //g_free (c->name);
+
+  clientUnframeWayland (c, FALSE);
+}
+
+static const struct zxfwm_shell_window_listener shell_window_impl = {
+	.title = shell_window_handle_title,
+	.app_id = shell_window_handle_app_id,
+	.output_enter = NULL,
+	.output_leave = NULL,
+	.state = shell_window_handle_state,
+	.done = shell_window_handle_done,
+	.closed = shell_window_handle_closed,
+};
+
+static void shell_handle_toplevel (void *data, struct zxfwm_shell *shell, struct zxfwm_shell_window *toplevel)
+{
+  ScreenInfo *screen_info = data;
+  Client *c;
+  
+  g_print ("window opened");
+
+  c = clientFrameWayland (screen_info, toplevel, FALSE);
+
+  zxfwm_shell_window_add_listener (toplevel, &shell_window_impl,
+                                                c);
+  
+}
+
+static void shell_handle_finished (void *data, struct zxfwm_shell *shell)
 {
   
 }
 
-static void shell_handle_finished (void *data, struct xfwm_shell *shell)
-{
-  
-}
-
-static void shell_handle_tabwin (void *data, struct xfwm_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
+static void shell_handle_tabwin (void *data, struct zxfwm_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
 {
   ScreenInfo *screen_info = data;
   XfwmEvent *event;
   eventFilterStatus status;
-  g_print ("tabwin");
+  g_print ("\ntabwin");
   
   event = g_new0 (XfwmEvent, 1);
   
@@ -197,17 +280,17 @@ static void shell_handle_tabwin (void *data, struct xfwm_shell *shell, uint32_t 
 
 }
 
-static void shell_handle_tabwin_next (void *data, struct xfwm_shell *shell)
+static void shell_handle_tabwin_next (void *data, struct zxfwm_shell *shell)
 {
 
 }
 
-static void shell_handle_tabwin_destroy (void *data, struct xfwm_shell *shell)
+static void shell_handle_tabwin_destroy (void *data, struct zxfwm_shell *shell)
 {
 
 }
 
-struct xfwm_shell_listener shell_impl = {
+struct zxfwm_shell_listener shell_impl = {
   shell_handle_toplevel,
   shell_handle_finished,
   shell_handle_tabwin,
@@ -430,14 +513,14 @@ void global_add (void               *data,
   ScreenInfo *screen_info = data;
   DisplayInfo *display_info = screen_info->display_info;
 
-  if (strcmp (interface, "xfwm_shell") == 0)
+  if (strcmp (interface, "zxfwm_shell") == 0)
     {
-      struct xfwm_shell *shell = NULL;
+      struct zxfwm_shell *shell = NULL;
       g_print ("xfway-shell\n");
-      shell = wl_registry_bind (registry, name, &xfwm_shell_interface, 1);
+      shell = wl_registry_bind (registry, name, &zxfwm_shell_interface, 1);
       screen_info->xfwm_shell = shell;
 
-      xfwm_shell_add_listener (shell, &shell_impl, screen_info);
+      zxfwm_shell_add_listener (shell, &shell_impl, screen_info);
     }
   else if (strcmp(interface,
 			"zwlr_foreign_toplevel_manager_v1") == 0) {

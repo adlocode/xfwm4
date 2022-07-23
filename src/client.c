@@ -1616,7 +1616,7 @@ clientRestoreSizePos (Client *c)
 }
 
 Client *
-clientFrameWayland (ScreenInfo *screen_info, struct zwlr_foreign_toplevel_handle_v1 *foreign_toplevel, gboolean recapture)
+clientFrameWayland (ScreenInfo *screen_info, struct zxfwm_shell_window *shell_window, gboolean recapture)
 {
     DisplayInfo *display_info;
     Window *w = None;
@@ -1648,7 +1648,7 @@ clientFrameWayland (ScreenInfo *screen_info, struct zwlr_foreign_toplevel_handle
   g_print ("created client");
 
     c->window = w;
-    c->toplevel_handle = foreign_toplevel;
+    c->shell_window = shell_window;
     c->screen_info = screen_info;
     c->serial = screen_info->client_serial++;
 

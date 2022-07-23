@@ -106,6 +106,8 @@ struct hopalong_server {
 	struct wl_list keybindings;  
   
   struct xfwm_shell *shell;
+  
+  bool is_windowed;
 };
 
 struct hopalong_server_options {

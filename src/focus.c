@@ -638,7 +638,7 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
   }
   else
     {
-        xfwm_shell_window_focus (NULL, screen_info->display_info->wl_seat);
+        zxfwm_shell_window_focus (c->shell_window, screen_info->display_info->wl_seat);
     }
 }
 
