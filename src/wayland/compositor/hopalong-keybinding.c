@@ -139,13 +139,16 @@ hopalong_keybinding_setup(struct hopalong_server *server)
 
 	hopalong_keybinding_add(server, WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_BackSpace, terminate);
 
-	hopalong_keybinding_add(server, WLR_MODIFIER_SHIFT | WLR_MODIFIER_ALT, XKB_KEY_Tab, switch_activity);
+  //This code commented out as this is now implemented client-side
+	/*
+  hopalong_keybinding_add(server, WLR_MODIFIER_SHIFT | WLR_MODIFIER_ALT, XKB_KEY_Tab, switch_activity);
 	hopalong_keybinding_add(server, WLR_MODIFIER_ALT, XKB_KEY_Tab, switch_activity);
   
   hopalong_keybinding_add(server, WLR_MODIFIER_ALT, XKB_KEY_a, switch_activity);
 
 	hopalong_keybinding_add(server, WLR_MODIFIER_SHIFT | WLR_MODIFIER_ALT, XKB_KEY_ISO_Left_Tab, switch_activity);
 	hopalong_keybinding_add(server, WLR_MODIFIER_ALT, XKB_KEY_ISO_Left_Tab, switch_activity);
+  */
 
 	hopalong_keybinding_add(server, WLR_MODIFIER_SHIFT | WLR_MODIFIER_ALT, XKB_KEY_D, toggle_title_bar);
 }

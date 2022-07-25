@@ -1,14 +1,22 @@
 /*
  * Hopalong - a friendly Wayland compositor
  * Copyright (c) 2020 Ariadne Conill <ariadne@dereferenced.org>
+ * 
+ * Copyright (C) 2018 - 2022 adlo
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * This software is provided 'as is' and without any warranty, express or
- * implied.  In no event shall the authors be liable for any damages arising
- * from the use of this software.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 #include <stdlib.h>
@@ -16,6 +24,9 @@
 #include "hopalong-server.h"
 #include "hopalong-decoration.h"
 #include "xfwm-shell.h"
+
+static void xfwm_shell_window_handle_focus (struct wl_listener *listener,
+                                            void *data);
 
 static struct hopalong_view *active_view = NULL;
 
@@ -29,6 +40,10 @@ hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
   wlr_log (WLR_INFO, "\nmap\n");
   
   view->shell_window = xfwm_shell_window_create (view->server->shell);
+  
+  view->shell_window_request_focus.notify = xfwm_shell_window_handle_focus;
+  wl_signal_add(&view->shell_window->events.shell_request_focus,
+                &view->shell_window_request_focus);
 
 	hopalong_view_focus(view, view->xdg_surface->surface);
 }
@@ -41,6 +56,8 @@ hopalong_xdg_surface_unmap(struct wl_listener *listener, void *data)
 	struct hopalong_view *view = wl_container_of(listener, view, unmap);
   
   xfwm_shell_window_destroy (view->shell_window);
+  
+  wl_list_remove (&view->shell_window_request_focus.link);
   
 	hopalong_view_unmap(view);
 }
@@ -198,6 +215,17 @@ hopalong_xdg_toplevel_set_activated(struct hopalong_view *view, bool activated)
   xfwm_shell_window_set_activated (view->shell_window, activated);
   
   active_view = view;
+}
+
+static void xfwm_shell_window_handle_focus (struct wl_listener *listener,
+                                            void *data)
+{
+  struct hopalong_view *view;
+  
+  struct xfwm_shell_window_focus_event *event = data;
+  view = wl_container_of (listener, view, shell_window_request_focus);
+  
+  hopalong_view_focus (view, view->xdg_surface->surface);
 }
 
 static bool

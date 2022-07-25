@@ -33,6 +33,8 @@
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 
+#include "xfwm-shell.h"
+
 struct hopalong_server;
 struct hopalong_view;
 
