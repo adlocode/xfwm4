@@ -1,8 +1,8 @@
 <protocol name="xfway">
 
   <interface name="zxfwm_shell" version="1">
-    <description summary="protocol for communication between xfwm4 and helper client">
-      This is a private protocol for communication between xfwm4 and the helper client.
+    <description summary="protocol for communication between compositor and helper client">
+      This is a private protocol for communication between xfwm4's Wayland compositor and its helper client.
     </description>
     
     <event name="toplevel">
