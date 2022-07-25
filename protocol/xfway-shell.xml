@@ -1,10 +1,8 @@
 <protocol name="xfway">
 
   <interface name="zxfwm_shell" version="1">
-    <description summary="create desktop widgets and helpers">
-      Traditional user interfaces can rely on this interface to define the
-      foundations of typical desktops. Currently it's possible to set up
-      background, panels and locking surfaces.
+    <description summary="protocol for communication between xfwm4 and helper client">
+      This is a private protocol for communication between xfwm4 and the helper client.
     </description>
     
     <event name="toplevel">
