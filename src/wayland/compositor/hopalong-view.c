@@ -148,7 +148,12 @@ hopalong_generate_builtin_textures_for_output(struct hopalong_output *output, co
 static bool
 hopalong_view_generate_title_texture(struct hopalong_output *output, struct hopalong_view *view)
 {
-	struct wlr_renderer *renderer = output->wlr_output->renderer;
+	view->title_dirty = false;
+  return true;
+  
+  //This code has been removed to fix bug
+  
+  struct wlr_renderer *renderer = output->wlr_output->renderer;
 
 	if (view->title)
 	{
