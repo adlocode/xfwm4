@@ -37,13 +37,24 @@ hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
 
 	struct hopalong_view *view = wl_container_of(listener, view, map);
   
+  char title[4096] = {};
+  
   wlr_log (WLR_INFO, "\nmap\n");
   
   view->shell_window = xfwm_shell_window_create (view->server->shell);
   
   view->shell_window_request_focus.notify = xfwm_shell_window_handle_focus;
   wl_signal_add(&view->shell_window->events.shell_request_focus,
-                &view->shell_window_request_focus);
+                &view->shell_window_request_focus);  
+
+	const char *title_data = hopalong_view_getprop(view, HOPALONG_VIEW_TITLE);
+	if (title_data == NULL)
+		title_data = hopalong_view_getprop(view, HOPALONG_VIEW_APP_ID);
+	if (title_data != NULL)
+		strlcpy(title, title_data, sizeof title);
+  
+  if (view->shell_window)
+    xfwm_shell_window_set_title (view->shell_window, title);
 
 	hopalong_view_focus(view, view->xdg_surface->surface);
 }
