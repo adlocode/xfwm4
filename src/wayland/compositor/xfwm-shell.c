@@ -624,9 +624,13 @@ xfwm_shell_tabwin_destroy (struct wl_listener *listener,
 {
   struct xfwm_tabwin *tabwin = wl_container_of (listener, tabwin, destroy);
   struct hopalong_view *view = tabwin->view;
-  view->tabwin_surface = NULL;
   
-  hopalong_view_destroy (view); 
+  wl_list_remove (&tabwin->surface_commit.link);
+  wl_list_remove (&tabwin->destroy.link);
+  
+  view->tabwin_surface = NULL;  
+  
+  hopalong_view_destroy (view);
   free (tabwin);
 }
 

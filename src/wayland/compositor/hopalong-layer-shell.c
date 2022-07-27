@@ -128,99 +128,103 @@ arrange_layer(struct wlr_output *output, struct wl_list *list, struct wlr_box *u
 	wl_list_for_each_reverse(view, list, mapped_link)
 	{
 		struct wlr_layer_surface_v1 *layer = view->layer_surface;
-		struct wlr_layer_surface_v1_state *state = &layer->current;
+    
+    if (layer)
+      {
+		   struct wlr_layer_surface_v1_state *state = &layer->current;
 
-		if (state->exclusive_zone > 0 && !exclusive)
-			continue;
+		   if (state->exclusive_zone > 0 && !exclusive)
+			   continue;
 
-		struct wlr_box bounds;
+		   struct wlr_box bounds;
 
-		if (state->exclusive_zone == -1)
-			bounds = full_area;
-		else
-			bounds = *usable_area;
+		   if (state->exclusive_zone == -1)
+			   bounds = full_area;
+		   else
+			   bounds = *usable_area;
 
-		struct wlr_box box = {
-			.width = state->desired_width,
-			.height = state->desired_height
-		};
+		   struct wlr_box box = {
+			   .width = state->desired_width,
+			   .height = state->desired_height
+		   };
 
-		/* Horizontal axis */
-		const uint32_t both_horiz = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT
-			| ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+		   /* Horizontal axis */
+		   const uint32_t both_horiz = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT
+			   | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
 
-		if ((state->anchor & both_horiz) && box.width == 0)
-		{
-			box.x = bounds.x;
-			box.width = bounds.width;
-		}
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT))
-			box.x = bounds.x;
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
-			box.x = bounds.x + (bounds.width - box.width);
-		else
-			box.x = bounds.x + ((bounds.width / 2) - (box.width / 2));
+		   if ((state->anchor & both_horiz) && box.width == 0)
+		   {
+			   box.x = bounds.x;
+			   box.width = bounds.width;
+		   }
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT))
+			   box.x = bounds.x;
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
+			   box.x = bounds.x + (bounds.width - box.width);
+		   else
+			   box.x = bounds.x + ((bounds.width / 2) - (box.width / 2));
 
-		/* Vertical axis */
-		const uint32_t both_vert = ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP
-			| ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+		   /* Vertical axis */
+		   const uint32_t both_vert = ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP
+			   | ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
 
-		if ((state->anchor & both_vert) && box.height == 0)
-		{
-			box.y = bounds.y;
-			box.height = bounds.height;
-		}
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP))
-			box.y = bounds.y;
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
-			box.y = bounds.y + (bounds.height - box.height);
-		else
-			box.y = bounds.y + ((bounds.height / 2) - (box.height / 2));
+		   if ((state->anchor & both_vert) && box.height == 0)
+		   {
+			   box.y = bounds.y;
+			   box.height = bounds.height;
+		   }
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP))
+			   box.y = bounds.y;
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
+			   box.y = bounds.y + (bounds.height - box.height);
+		   else
+			   box.y = bounds.y + ((bounds.height / 2) - (box.height / 2));
 
-		/* Margin */
-		if ((state->anchor & both_horiz) == both_horiz)
-		{
-			int32_t total_margin = state->margin.left + state->margin.right;
+		   /* Margin */
+		   if ((state->anchor & both_horiz) == both_horiz)
+		   {
+			   int32_t total_margin = state->margin.left + state->margin.right;
 
-			box.x += state->margin.left;
+			   box.x += state->margin.left;
 
-			if (total_margin < box.width)
-				box.width -= total_margin;
-		}
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT))
-			box.x += state->margin.left;
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
-			box.x -= state->margin.right;
+			   if (total_margin < box.width)
+				   box.width -= total_margin;
+		   }
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT))
+			   box.x += state->margin.left;
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
+			   box.x -= state->margin.right;
 
-		if ((state->anchor & both_vert) == both_vert)
-		{
-			int32_t total_margin = state->margin.top + state->margin.bottom;
+		   if ((state->anchor & both_vert) == both_vert)
+		   {
+			   int32_t total_margin = state->margin.top + state->margin.bottom;
 
-			box.y += state->margin.top;
+			   box.y += state->margin.top;
 
-			if (total_margin < box.height)
-				box.height -= total_margin;
-		}
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP))
-			box.y += state->margin.top;
-		else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
-			box.y -= state->margin.bottom;
+			   if (total_margin < box.height)
+				   box.height -= total_margin;
+		   }
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP))
+			   box.y += state->margin.top;
+		   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
+			   box.y -= state->margin.bottom;
 
-		if (box.width < 0 || box.height < 0)
-		{
-			wlr_layer_surface_v1_destroy(layer);
-			continue;
-		}
+		   if (box.width < 0 || box.height < 0)
+		   {
+			   wlr_layer_surface_v1_destroy(layer);
+			   continue;
+		   }
 
-		apply_exclusive(usable_area, state->anchor,
-			state->exclusive_zone, state->margin.top,
-			state->margin.right, state->margin.bottom,
-			state->margin.left);
+		   apply_exclusive(usable_area, state->anchor,
+			   state->exclusive_zone, state->margin.top,
+			   state->margin.right, state->margin.bottom,
+			   state->margin.left);
 
-		view->x = box.x;
-		view->y = box.y;
+		   view->x = box.x;
+		   view->y = box.y;
 
-		wlr_layer_surface_v1_configure(layer, box.width, box.height);
+		   wlr_layer_surface_v1_configure(layer, box.width, box.height);
+      }
 	}
 }
 
