@@ -333,7 +333,7 @@ hopalong_layer_shell_new_surface(struct wl_listener *listener, void *data)
 	view->using_csd = true;
 
 	view->layer_surface = layer_surface;
-	layer_surface->data = view;
+	layer_surface->data = view;  
 
 	if (layer_surface->output == NULL)
 	{

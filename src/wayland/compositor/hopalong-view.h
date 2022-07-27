@@ -96,6 +96,8 @@ struct hopalong_view {
 	struct wlr_xdg_surface *xdg_surface;
 	struct wlr_xwayland_surface *xwayland_surface;
 	struct wlr_layer_surface_v1 *layer_surface;
+  
+  struct wlr_surface *tabwin_surface;
 
 	struct wl_listener map;
 	struct wl_listener unmap;

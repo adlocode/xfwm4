@@ -121,7 +121,7 @@ void xfwm_server_shell_init (struct hopalong_server *server, int argc, char *arg
   struct weston_client *client;
   struct wl_event_loop *loop;
   
-  server->shell = xfwm_shell_create (server->display);
+  server->shell = xfwm_shell_create (server, server->display);
   
   wlr_log (WLR_INFO, "\ninit shell\n");
 

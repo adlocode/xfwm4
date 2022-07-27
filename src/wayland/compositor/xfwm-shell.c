@@ -55,6 +55,15 @@ struct process_info {
 	char *path;
 };
 
+struct xfwm_tabwin
+{
+  struct hopalong_view *view;
+  struct wlr_output *output;
+  
+  struct wl_listener surface_commit;
+  struct wl_listener destroy;
+};
+
 static inline void *
 zalloc(size_t size)
 {
@@ -591,12 +600,119 @@ xfwm_shell_window_create(
 static const struct zxfwm_shell_interface
 	foreign_toplevel_manager_impl;
 
+static void
+xfwm_shell_tabwin_nop (struct hopalong_view *view)
+{
+  
+}
+
+static struct wlr_surface *
+xfwm_shell_tabwin_get_surface (struct hopalong_view *view)
+{  
+  return view->tabwin_surface;
+}
+
+static struct wlr_surface *
+xfwm_shell_tabwin_surface_at (struct hopalong_view *view, double x, double y, double *sx, double *sy)
+{
+  return NULL;
+}
+
+static void
+xfwm_shell_tabwin_destroy (struct wl_listener *listener,
+                           void               *data)
+{
+  struct xfwm_tabwin *tabwin = wl_container_of (listener, tabwin, destroy);
+  struct hopalong_view *view = tabwin->view;
+  view->tabwin_surface = NULL;
+  
+  hopalong_view_destroy (view); 
+  free (tabwin);
+}
+
+static const struct hopalong_view_ops hopalong_layer_shell_view_ops = {
+	.minimize = xfwm_shell_tabwin_nop,
+	.maximize = xfwm_shell_tabwin_nop,
+	.close = xfwm_shell_tabwin_nop,
+	.getprop = xfwm_shell_tabwin_nop,
+	.get_surface = xfwm_shell_tabwin_get_surface,
+	.set_activated = (void *) xfwm_shell_tabwin_nop,
+	.get_geometry = xfwm_shell_tabwin_nop,
+	.set_size = (void *) xfwm_shell_tabwin_nop,
+	.surface_at = xfwm_shell_tabwin_surface_at,
+	.can_move = xfwm_shell_tabwin_nop,
+	.can_resize = xfwm_shell_tabwin_nop,
+};
+
+static void
+xfwm_shell_tabwin_map (struct wl_listener *listener,
+                       void               *data)
+{
+  
+}
+
+static void
+xfwm_shell_tabwin_commit (struct wl_listener *listener,
+                          void               *data)
+{
+  struct xfwm_tabwin *tabwin = wl_container_of (listener, tabwin, surface_commit);
+  struct hopalong_view *view = tabwin->view;
+  struct wlr_output *output = tabwin->output;
+  
+  view->using_csd = true;
+  
+  view->x = (output->width / 2) - (view->tabwin_surface->current.width / 2);
+  view->y = (output->height / 2) - (view->tabwin_surface->current.height / 2);  
+}
+
 static void xfwm_shell_handle_set_tabwin (struct wl_client   *client,
                                           struct wl_resource *resource,
                                           struct wl_resource *surface_resource,
                                           struct wl_resource *output_resource)
 {
+  struct xfwm_shell *shell = wl_resource_get_user_data (resource);
+  struct wlr_surface *surface = wl_resource_get_user_data (surface_resource);
   
+  struct hopalong_server *server = shell->server;
+  
+  struct wlr_output *output = wl_resource_get_user_data (output_resource);
+  
+  if (output == NULL)
+    {
+      output = wlr_output_layout_output_at(
+			server->output_layout, server->cursor->x,
+			server->cursor->y);
+    }
+  
+  struct hopalong_view *view = calloc(1, sizeof(*view));
+  
+  view->tabwin_surface = surface;
+  
+  view->server = server;
+	view->ops = &hopalong_layer_shell_view_ops;
+	view->using_csd = true;
+  
+  view->layer = HOPALONG_LAYER_OVERLAY;
+  
+  view->x = view->y = 64;
+  
+  struct xfwm_tabwin *tabwin = calloc(1, sizeof(*tabwin));
+  
+  tabwin->view = view;
+  tabwin->output = output;  
+  
+  wlr_log (WLR_INFO, "\nwidth: %d\n", surface->current.width);
+  
+  view->map.notify = xfwm_shell_tabwin_map;
+  
+  tabwin->surface_commit.notify = xfwm_shell_tabwin_commit;
+  wl_signal_add (&surface->events.commit, &tabwin->surface_commit);
+  
+  tabwin->destroy.notify = xfwm_shell_tabwin_destroy;
+  wl_signal_add (&surface->events.destroy, &tabwin->destroy);
+    
+  wl_list_insert(&server->views, &view->link);
+  hopalong_view_map (view);  
 }
 
 static void foreign_toplevel_manager_handle_stop(struct wl_client *client,
@@ -991,8 +1107,9 @@ static void handle_display_destroy(struct wl_listener *listener, void *data) {
 	xfwm_shell_destroy(manager);
 }
 
-struct xfwm_shell *xfwm_shell_create(
-		struct wl_display *display) {
+struct xfwm_shell *xfwm_shell_create(struct hopalong_server *server,
+		                                 struct wl_display *display)
+{
 	struct xfwm_shell *manager = calloc(1,
 			sizeof(struct xfwm_shell));
 	if (!manager) {
@@ -1001,6 +1118,7 @@ struct xfwm_shell *xfwm_shell_create(
                                      
   manager->display = display;
 	manager->event_loop = wl_display_get_event_loop(display);
+  manager->server = server;
       
   wl_list_init(&child_process_list);
   

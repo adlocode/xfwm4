@@ -152,6 +152,12 @@ render_view_surface(struct hopalong_view *view, struct render_data *data)
 		render_surface(surface, 0, 0, data);
 		return;
 	}
+  else if (view->tabwin_surface)
+    {
+      struct wlr_surface *surface = hopalong_view_get_surface (view);
+      
+      render_surface (surface, 0, 0, data);
+    }
 
 	wlr_log(WLR_ERROR, "render_view_surface: don't know how to render view %p", view);
 }

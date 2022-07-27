@@ -51,9 +51,11 @@
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 #include <protocol/xfway-shell-protocol.h>
+#include "hopalong-server.h"
 //#include <wlr/types/wlr_output.h>
 
 struct xfwm_shell {
+  struct hopalong_server *server;
 	struct wl_event_loop *event_loop;
 	struct wl_global *global;
 	struct wl_list resources;
@@ -77,6 +79,8 @@ struct xfwm_shell {
 		unsigned deathcount;
 		struct timespec deathstamp;
 	} child;
+  
+  struct wl_listener tabwin_map;
 };
 
 /*struct xfwm_shell_window_output {
@@ -164,7 +168,7 @@ struct xfwm_shell_window_raise_event {
 	struct wlr_seat *seat;
 };
 
-struct xfwm_shell *xfwm_shell_create(
+struct xfwm_shell *xfwm_shell_create(struct hopalong_server *server,
 	struct wl_display *display);
 void xfwm_shell_destroy(
 	struct xfwm_shell *manager);
