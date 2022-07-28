@@ -43,8 +43,8 @@
 #include "hopalong-xwayland.h"
 #include "hopalong-style.h"
 #include "hopalong-layer-shell.h"
-
-#include "xfwm-shell.h"
+ 
+typedef struct _Shell Shell; 
 
 enum hopalong_cursor_mode {
 	HOPALONG_CURSOR_PASSTHROUGH,
@@ -105,7 +105,7 @@ struct hopalong_server {
 
 	struct wl_list keybindings;  
   
-  struct xfwm_shell *shell;
+  Shell *shell;
   
   bool is_windowed;
 };

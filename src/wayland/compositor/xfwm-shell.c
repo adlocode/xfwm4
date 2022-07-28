@@ -164,7 +164,7 @@ static void xfwm_shell_send_focus_signal (struct wl_client   *client,
   struct xfwm_shell_window *toplevel;
   struct wlr_seat *seat;
   
-  struct xfwm_shell *shell;
+  Shell *shell;
   
   toplevel = wl_resource_get_user_data (handle_resource);
   seat = wl_resource_get_user_data (seat_resource);
@@ -184,7 +184,7 @@ static void xfwm_shell_send_raise_signal (struct wl_client   *client,
 {
   struct xfwm_shell_window *toplevel;
   struct wlr_seat *seat;  
-  struct xfwm_shell *shell;
+  Shell *shell;
   
   toplevel = wl_resource_get_user_data (handle_resource);
   seat = wl_resource_get_user_data (seat_resource);
@@ -564,7 +564,7 @@ static struct wl_resource *create_toplevel_resource_for_resource(
 
 struct xfwm_shell_window *
 xfwm_shell_window_create(
-		struct xfwm_shell *manager) {
+		Shell *manager) {
 	struct xfwm_shell_window *toplevel = calloc(1,
 			sizeof(struct xfwm_shell_window));
 	if (!toplevel) {
@@ -674,7 +674,7 @@ static void xfwm_shell_handle_set_tabwin (struct wl_client   *client,
                                           struct wl_resource *surface_resource,
                                           struct wl_resource *output_resource)
 {
-  struct xfwm_shell *shell = wl_resource_get_user_data (resource);
+  Shell *shell = wl_resource_get_user_data (resource);
   struct wlr_surface *surface = wl_resource_get_user_data (surface_resource);
   
   struct hopalong_server *server = shell->server;
@@ -772,7 +772,7 @@ static void toplevel_send_details_to_toplevel_resource(
 
 static void foreign_toplevel_manager_bind(struct wl_client *client, void *data,
 		uint32_t version, uint32_t id) {
-	struct xfwm_shell *manager = data;
+	Shell *manager = data;
 	struct wl_resource *resource = wl_resource_create(client,
 			&zxfwm_shell_interface, version, id);
 	
@@ -785,7 +785,7 @@ static void foreign_toplevel_manager_bind(struct wl_client *client, void *data,
 static void
 unbind_desktop_shell(struct wl_resource *resource)
 {
-	struct xfwm_shell *shell = wl_resource_get_user_data(resource);
+	Shell *shell = wl_resource_get_user_data(resource);
 
 	shell->child.desktop_shell = NULL;
 }
@@ -794,7 +794,7 @@ static void
 bind_desktop_shell(struct wl_client *client,
 		   void *data, uint32_t version, uint32_t id)
 {
-	struct xfwm_shell *shell = data;
+	Shell *shell = data;
 	struct wl_resource *resource;
 
 	resource = wl_resource_create(client, &zxfwm_shell_interface,
@@ -953,7 +953,7 @@ weston_watch_process(struct weston_process *process)
 }
 
 WL_EXPORT struct wl_client *
-weston_client_launch(struct xfwm_shell *server,
+weston_client_launch(Shell *server,
 		     struct weston_process *proc,
 		     const char *path,
 		     weston_process_cleanup_func_t cleanup)
@@ -1004,7 +1004,7 @@ weston_client_launch(struct xfwm_shell *server,
 }
 
 WL_EXPORT struct wl_client *
-weston_client_start(struct xfwm_shell *server, const char *path)
+weston_client_start(Shell *server, const char *path)
 {
 	struct process_info *pinfo;
 	struct wl_client *client;
@@ -1038,9 +1038,9 @@ out_free:
 static void
 desktop_shell_client_destroy(struct wl_listener *listener, void *data)
 {
-	struct xfwm_shell *shell;
+	Shell *shell;
 
-	shell = container_of(listener, struct xfwm_shell,
+	shell = container_of(listener, Shell,
 			     child.client_destroy_listener);
 
 	wl_list_remove(&shell->child.client_destroy_listener.link);
@@ -1062,7 +1062,7 @@ desktop_shell_client_destroy(struct wl_listener *listener, void *data)
 static void
 launch_desktop_shell_process(void *data)
 {
-	struct xfwm_shell *server = data;
+	Shell *server = data;
   char *client;  
   
   wlr_log (WLR_INFO, "\nlaunch desktop shell\n");
@@ -1083,7 +1083,7 @@ launch_desktop_shell_process(void *data)
 }
 
 void xfwm_shell_destroy(
-		struct xfwm_shell *manager) {
+		Shell *manager) {
 	if (!manager) {
 		return;
 	}
@@ -1106,16 +1106,16 @@ void xfwm_shell_destroy(
 }
 
 static void handle_display_destroy(struct wl_listener *listener, void *data) {
-	struct xfwm_shell *manager =
+	Shell *manager =
 		wl_container_of(listener, manager, display_destroy);
 	xfwm_shell_destroy(manager);
 }
 
-struct xfwm_shell *xfwm_shell_create(struct hopalong_server *server,
+Shell *xfwm_shell_create(struct hopalong_server *server,
 		                                 struct wl_display *display)
 {
-	struct xfwm_shell *manager = calloc(1,
-			sizeof(struct xfwm_shell));
+	Shell *manager = calloc(1,
+			sizeof(Shell));
 	if (!manager) {
 		return NULL;
 	}

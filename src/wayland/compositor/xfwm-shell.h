@@ -54,7 +54,7 @@
 #include "hopalong-server.h"
 //#include <wlr/types/wlr_output.h>
 
-struct xfwm_shell {
+struct _Shell {
   struct hopalong_server *server;
 	struct wl_event_loop *event_loop;
 	struct wl_global *global;
@@ -83,6 +83,8 @@ struct xfwm_shell {
   struct wl_listener tabwin_map;
 };
 
+typedef struct _Shell Shell;
+
 /*struct xfwm_shell_window_output {
 	struct wl_list link; // xfwm_shell_window::outputs
 	struct wl_listener output_destroy;
@@ -92,7 +94,7 @@ struct xfwm_shell {
 };*/
 
 struct xfwm_shell_window {
-	struct xfwm_shell *manager;
+	Shell *manager;
 	struct wl_list resources;
 	struct wl_list link;
 	struct wl_event_source *idle_source;
@@ -168,13 +170,13 @@ struct xfwm_shell_window_raise_event {
 	struct wlr_seat *seat;
 };
 
-struct xfwm_shell *xfwm_shell_create(struct hopalong_server *server,
+Shell *xfwm_shell_create(struct hopalong_server *server,
 	struct wl_display *display);
 void xfwm_shell_destroy(
-	struct xfwm_shell *manager);
+	Shell *manager);
 
 struct xfwm_shell_window *xfwm_shell_window_create(
-	struct xfwm_shell *manager);
+	Shell *manager);
 void xfwm_shell_window_destroy(
 	struct xfwm_shell_window *toplevel);
 

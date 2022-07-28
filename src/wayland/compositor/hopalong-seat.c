@@ -54,7 +54,7 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
 	return_if_fail(listener != NULL);
 	return_if_fail(data != NULL);
 
-        struct hopalong_keyboard *keyboard = wl_container_of(listener, keyboard, key);
+  struct hopalong_keyboard *keyboard = wl_container_of(listener, keyboard, key);
 	struct hopalong_server *server = keyboard->server;
 	struct wlr_event_keyboard_key *event = data;
 	struct wlr_seat *seat = server->seat;
