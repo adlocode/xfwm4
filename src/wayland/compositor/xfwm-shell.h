@@ -59,7 +59,7 @@ struct _Shell {
 	struct wl_event_loop *event_loop;
 	struct wl_global *global;
 	struct wl_list resources;
-	struct wl_list toplevels; // xfwm_shell_window::link
+	struct wl_list toplevels; // ShellWindow::link
 
 	struct wl_listener display_destroy;
 
@@ -86,14 +86,14 @@ struct _Shell {
 typedef struct _Shell Shell;
 
 /*struct xfwm_shell_window_output {
-	struct wl_list link; // xfwm_shell_window::outputs
+	struct wl_list link; // ShellWindow::outputs
 	struct wl_listener output_destroy;
 	struct wlr_output *output;
 
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 };*/
 
-struct xfwm_shell_window {
+struct _ShellWindow {
 	Shell *manager;
 	struct wl_list resources;
 	struct wl_list link;
@@ -126,6 +126,8 @@ struct xfwm_shell_window {
 	void *data;
 };
 
+typedef struct _ShellWindow ShellWindow;
+
 enum xfwm_shell_window_state {
 	XFWM_SHELL_WINDOW_STATE_MAXIMIZED = (1 << 0),
 	XFWM_SHELL_WINDOW_STATE_MINIMIZED = (1 << 1),
@@ -134,39 +136,39 @@ enum xfwm_shell_window_state {
 };
 
 struct xfwm_shell_window_maximized_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	bool maximized;
 };
 
 struct xfwm_shell_window_minimized_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	bool minimized;
 };
 
 struct xfwm_shell_window_activated_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	struct wlr_seat *seat;
 };
 
 /*struct xfwm_shell_window_fullscreen_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	bool fullscreen;
 	struct wlr_output *output;
 };*/
 
 struct xfwm_shell_window_set_rectangle_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	struct wlr_surface *surface;
 	int32_t x, y, width, height;
 };
 
 struct xfwm_shell_window_focus_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	struct wlr_seat *seat;
 };
 
 struct xfwm_shell_window_raise_event {
-	struct xfwm_shell_window *toplevel;
+	ShellWindow *toplevel;
 	struct wlr_seat *seat;
 };
 
@@ -175,28 +177,28 @@ Shell *xfwm_shell_create(struct hopalong_server *server,
 void xfwm_shell_destroy(
 	Shell *manager);
 
-struct xfwm_shell_window *xfwm_shell_window_create(
+ShellWindow *xfwm_shell_window_create(
 	Shell *manager);
 void xfwm_shell_window_destroy(
-	struct xfwm_shell_window *toplevel);
+	ShellWindow *toplevel);
 
 void xfwm_shell_window_set_title(
-	struct xfwm_shell_window *toplevel, const char *title);
+	ShellWindow *toplevel, const char *title);
 void xfwm_shell_window_set_app_id(
-	struct xfwm_shell_window *toplevel, const char *app_id);
+	ShellWindow *toplevel, const char *app_id);
 
 //void xfwm_shell_window_output_enter(
-	//struct xfwm_shell_window *toplevel, struct wlr_output *output);
+	//ShellWindow *toplevel, struct wlr_output *output);
 //void xfwm_shell_window_output_leave(
-	//struct xfwm_shell_window *toplevel, struct wlr_output *output);
+	//ShellWindow *toplevel, struct wlr_output *output);
 
 void xfwm_shell_window_set_maximized(
-	struct xfwm_shell_window *toplevel, bool maximized);
+	ShellWindow *toplevel, bool maximized);
 void xfwm_shell_window_set_minimized(
-	struct xfwm_shell_window *toplevel, bool minimized);
+	ShellWindow *toplevel, bool minimized);
 void xfwm_shell_window_set_activated(
-	struct xfwm_shell_window *toplevel, bool activated);
+	ShellWindow *toplevel, bool activated);
 void xfwm_shell_window_set_fullscreen(
-	struct xfwm_shell_window* toplevel, bool fullscreen);
+	ShellWindow* toplevel, bool fullscreen);
 
 #endif

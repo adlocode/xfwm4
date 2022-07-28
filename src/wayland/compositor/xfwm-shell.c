@@ -70,7 +70,7 @@ zalloc(size_t size)
 	return calloc(1, size);
 }
 
-static struct xfwm_shell_window *toplevel_handle_from_resource(
+static ShellWindow *toplevel_handle_from_resource(
 		struct wl_resource *resource) {
 	assert(wl_resource_instance_of(resource,
 			&zxfwm_shell_window_interface,
@@ -80,7 +80,7 @@ static struct xfwm_shell_window *toplevel_handle_from_resource(
 
 static void toplevel_handle_send_maximized_event(struct wl_resource *resource,
 		bool state) {
-	struct xfwm_shell_window *toplevel =
+	ShellWindow *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
@@ -104,7 +104,7 @@ void foreign_toplevel_handle_unset_maximized(struct wl_client *client,
 
 static void toplevel_send_minimized_event(struct wl_resource *resource,
 		bool state) {
-	struct xfwm_shell_window *toplevel =
+	ShellWindow *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
@@ -129,7 +129,7 @@ static void foreign_toplevel_handle_unset_minimized(struct wl_client *client,
 
 static void toplevel_send_fullscreen_event(struct wl_resource *resource,
 		bool state, struct wl_resource *output_resource) {
-	/*struct xfwm_shell_window *toplevel =
+	/*ShellWindow *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
@@ -161,7 +161,7 @@ static void xfwm_shell_send_focus_signal (struct wl_client   *client,
                                             struct wl_resource *handle_resource,
                                             struct wl_resource *seat_resource)
 {
-  struct xfwm_shell_window *toplevel;
+  ShellWindow *toplevel;
   struct wlr_seat *seat;
   
   Shell *shell;
@@ -182,7 +182,7 @@ static void xfwm_shell_send_raise_signal (struct wl_client   *client,
                                             struct wl_resource *handle_resource,
                                             struct wl_resource *seat_resource)
 {
-  struct xfwm_shell_window *toplevel;
+  ShellWindow *toplevel;
   struct wlr_seat *seat;  
   Shell *shell;
   
@@ -200,7 +200,7 @@ static void xfwm_shell_send_raise_signal (struct wl_client   *client,
 
 static void foreign_toplevel_handle_activate(struct wl_client *client,
 		struct wl_resource *resource, struct wl_resource *seat_resource) {
-	struct xfwm_shell_window *toplevel =
+	ShellWindow *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
@@ -216,7 +216,7 @@ static void foreign_toplevel_handle_activate(struct wl_client *client,
 
 static void foreign_toplevel_handle_close(struct wl_client *client,
 		struct wl_resource *resource) {
-	struct xfwm_shell_window *toplevel =
+	ShellWindow *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
@@ -227,7 +227,7 @@ static void foreign_toplevel_handle_close(struct wl_client *client,
 static void foreign_toplevel_handle_set_rectangle(struct wl_client *client,
 		struct wl_resource *resource, struct wl_resource *surface,
 		int32_t x, int32_t y, int32_t width, int32_t height) {
-	struct xfwm_shell_window *toplevel =
+	ShellWindow *toplevel =
 		toplevel_handle_from_resource(resource);
 	if (!toplevel) {
 		return;
@@ -272,7 +272,7 @@ static const struct zxfwm_shell_window_interface toplevel_handle_impl = {
 };
 
 static void toplevel_idle_send_done(void *data) {
-	struct xfwm_shell_window *toplevel = data;
+	ShellWindow *toplevel = data;
 	struct wl_resource *resource;
 	wl_resource_for_each(resource, &toplevel->resources) {
 		zxfwm_shell_window_send_done(resource);
@@ -282,7 +282,7 @@ static void toplevel_idle_send_done(void *data) {
 }
 
 static void toplevel_update_idle_source(
-	struct xfwm_shell_window *toplevel) {
+	ShellWindow *toplevel) {
 	if (toplevel->idle_source) {
 		return;
 	}
@@ -292,7 +292,7 @@ static void toplevel_update_idle_source(
 }
 
 void xfwm_shell_window_set_title(
-		struct xfwm_shell_window *toplevel, const char *title) {
+		ShellWindow *toplevel, const char *title) {
   if (toplevel->title)
 	   free(toplevel->title);
 	toplevel->title = strdup(title);
@@ -306,7 +306,7 @@ void xfwm_shell_window_set_title(
 }
 
 void xfwm_shell_window_set_app_id(
-		struct xfwm_shell_window *toplevel, const char *app_id) {
+		ShellWindow *toplevel, const char *app_id) {
 	free(toplevel->app_id);
 	toplevel->app_id = strdup(app_id);
 
@@ -336,7 +336,7 @@ void xfwm_shell_window_set_app_id(
 	}
 }*/
 
-/*static void toplevel_send_output(struct xfwm_shell_window *toplevel,
+/*static void toplevel_send_output(ShellWindow *toplevel,
 		struct wlr_output *output, bool enter) {
 	struct wl_resource *resource;
 	wl_resource_for_each(resource, &toplevel->resources) {
@@ -355,7 +355,7 @@ static void toplevel_handle_output_destroy(struct wl_listener *listener,
 }
 
 void xfwm_shell_window_output_enter(
-		struct xfwm_shell_window *toplevel,
+		ShellWindow *toplevel,
 		struct wlr_output *output) {
 	struct xfwm_shell_window_output *toplevel_output;
 	wl_list_for_each(toplevel_output, &toplevel->outputs, link) {
@@ -389,7 +389,7 @@ static void toplevel_output_destroy(
 }
 
 void xfwm_shell_window_output_leave(
-		struct xfwm_shell_window *toplevel,
+		ShellWindow *toplevel,
 		struct wlr_output *output) {
 	struct xfwm_shell_window_output *toplevel_output_iterator;
 	struct xfwm_shell_window_output *toplevel_output = NULL;
@@ -443,7 +443,7 @@ static bool fill_array_from_toplevel_state(struct wl_array *array,
 	return true;
 }
 
-static void toplevel_send_state(struct xfwm_shell_window *toplevel) {
+static void toplevel_send_state(ShellWindow *toplevel) {
 	struct wl_array states;
 	wl_array_init(&states);
 	bool r = fill_array_from_toplevel_state(&states, toplevel->state);
@@ -467,7 +467,7 @@ static void toplevel_send_state(struct xfwm_shell_window *toplevel) {
 }
 
 void xfwm_shell_window_set_maximized(
-		struct xfwm_shell_window *toplevel, bool maximized) {
+		ShellWindow *toplevel, bool maximized) {
 	if (maximized) {
 		toplevel->state |= XFWM_SHELL_WINDOW_STATE_MAXIMIZED;
 	} else {
@@ -477,7 +477,7 @@ void xfwm_shell_window_set_maximized(
 }
 
 void xfwm_shell_window_set_minimized(
-		struct xfwm_shell_window *toplevel, bool minimized) {
+		ShellWindow *toplevel, bool minimized) {
 	if (minimized) {
 		toplevel->state |= XFWM_SHELL_WINDOW_STATE_MINIMIZED;
 	} else {
@@ -487,7 +487,7 @@ void xfwm_shell_window_set_minimized(
 }
 
 void xfwm_shell_window_set_activated(
-		struct xfwm_shell_window *toplevel, bool activated) {
+		ShellWindow *toplevel, bool activated) {
 	if (activated) {
 		toplevel->state |= XFWM_SHELL_WINDOW_STATE_ACTIVATED;
 	} else {
@@ -497,7 +497,7 @@ void xfwm_shell_window_set_activated(
 }
 
 void xfwm_shell_window_set_fullscreen(
-		struct xfwm_shell_window * toplevel, bool fullscreen) {
+		ShellWindow * toplevel, bool fullscreen) {
 	if (fullscreen) {
 		toplevel->state |= XFWM_SHELL_WINDOW_STATE_FULLSCREEN;
 	} else {
@@ -507,7 +507,7 @@ void xfwm_shell_window_set_fullscreen(
 }
 
 void xfwm_shell_window_destroy(
-		struct xfwm_shell_window *toplevel) {
+		ShellWindow *toplevel) {
 	if (!toplevel) {
 		return;
 	}
@@ -543,7 +543,7 @@ static void foreign_toplevel_resource_destroy(struct wl_resource *resource) {
 }
 
 static struct wl_resource *create_toplevel_resource_for_resource(
-		struct xfwm_shell_window *toplevel,
+		ShellWindow *toplevel,
 		struct wl_resource *manager_resource) {
 	struct wl_client *client = wl_resource_get_client(manager_resource);
 	struct wl_resource *resource = wl_resource_create(client,
@@ -562,11 +562,11 @@ static struct wl_resource *create_toplevel_resource_for_resource(
 	return resource;
 }
 
-struct xfwm_shell_window *
+ShellWindow *
 xfwm_shell_window_create(
 		Shell *manager) {
-	struct xfwm_shell_window *toplevel = calloc(1,
-			sizeof(struct xfwm_shell_window));
+	ShellWindow *toplevel = calloc(1,
+			sizeof(ShellWindow));
 	if (!toplevel) {
 		return NULL;
 	}
@@ -741,7 +741,7 @@ static void foreign_toplevel_manager_resource_destroy(
 }
 
 static void toplevel_send_details_to_toplevel_resource(
-		struct xfwm_shell_window *toplevel,
+		ShellWindow *toplevel,
 		struct wl_resource *resource) {
 	if (toplevel->title) {
 		zxfwm_shell_window_send_title(resource, toplevel->title);
@@ -815,7 +815,7 @@ bind_desktop_shell(struct wl_client *client,
     
     wl_list_insert(&shell->resources, wl_resource_get_link(resource));
 
-	  struct xfwm_shell_window *toplevel, *tmp;
+	  ShellWindow *toplevel, *tmp;
 	  wl_list_for_each_safe(toplevel, tmp, &shell->toplevels, link) {
 		  struct wl_resource *toplevel_resource =
 			  create_toplevel_resource_for_resource(toplevel, resource);
@@ -1088,7 +1088,7 @@ void xfwm_shell_destroy(
 		return;
 	}
 
-	struct xfwm_shell_window *toplevel, *tmp_toplevel;
+	ShellWindow *toplevel, *tmp_toplevel;
 	wl_list_for_each_safe(toplevel, tmp_toplevel, &manager->toplevels, link) {
 		xfwm_shell_window_destroy(toplevel);
 	}

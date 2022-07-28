@@ -39,6 +39,8 @@ struct hopalong_output;
 struct hopalong_server;
 struct hopalong_view;
 
+typedef struct _ShellWindow ShellWindow;
+
 /*
  * Hopalong has five layers, mediated by the wlr-layer-shell, xdg-shell and
  * xwayland-shell protocols.  xdg-shell and xwayland-shell surfaces are always
@@ -129,7 +131,7 @@ struct hopalong_view {
 	bool activated;
 	bool hide_title_bar;
   
-  struct xfwm_shell_window *shell_window;
+  ShellWindow *shell_window;
 };
 
 struct hopalong_generated_textures {
