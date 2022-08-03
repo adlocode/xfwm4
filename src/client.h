@@ -356,6 +356,11 @@ struct _Client
     guint32 opacity;
     guint32 opacity_applied;
     guint opacity_flags;
+  
+    void (*focus) (ScreenInfo     *screen_info,
+                   Client         *c,
+                   guint32         timestamp,
+                   unsigned short  flags);
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     /* Startup notification */

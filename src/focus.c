@@ -545,16 +545,17 @@ clientUpdateFocus (ScreenInfo *screen_info, Client * c, unsigned short flags)
 }
 
 void
-clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned short flags)
+clientSetFocusWayland (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned short flags)
 {
-    Client *c2;
+  zxfwm_shell_window_focus (c->shell_window, screen_info->display_info->wl_seat);
+}
 
-    TRACE ("entering");
+void
+clientSetFocusX11 (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned short flags)
+{
+  Client *c2;
   
-  if (GDK_IS_X11_DISPLAY (screen_info->display_info->gdisplay))
-  {
-
-    c2 = NULL;
+  c2 = NULL;
     if ((c) && !(flags & FOCUS_IGNORE_MODAL))
     {
         c2 = clientGetModalFor (c);
@@ -635,11 +636,15 @@ clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned 
         clientFocusNone (screen_info, c2, timestamp);
         clientClearDelayedFocus ();
     }
-  }
-  else
-    {
-        zxfwm_shell_window_focus (c->shell_window, screen_info->display_info->wl_seat);
-    }
+}
+  
+
+void
+clientSetFocus (ScreenInfo *screen_info, Client *c, guint32 timestamp, unsigned short flags)
+{
+    TRACE ("entering");
+  
+    c->focus (screen_info, c, timestamp, flags);
 }
 
 void

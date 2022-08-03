@@ -67,6 +67,14 @@ void                     clientSetFocus                         (ScreenInfo *,
                                                                  Client *,
                                                                  guint32,
                                                                  unsigned short);
+void                     clientSetFocusWayland                  (ScreenInfo *screen_info,
+                                                                 Client *c,
+                                                                 guint32 timestamp,
+                                                                 unsigned short flags);
+void                     clientSetFocusX11                      (ScreenInfo *screen_info,
+                                                                 Client *c,
+                                                                 guint32 timestamp,
+                                                                 unsigned short flags);
 void                     clientInitFocusFlag                    (Client *);
 Client                  *clientGetFocus                         (void);
 Client                  *clientGetFocusPending                  (void);

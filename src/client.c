@@ -1679,6 +1679,8 @@ clientFrameWayland (ScreenInfo *screen_info, struct zxfwm_shell_window *shell_wi
     c->applied_geometry.y = c->y;
     c->applied_geometry.width = c->width;
     c->applied_geometry.height = c->height;
+  
+    c->focus = clientSetFocusWayland;
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     c->startup_id = NULL;
@@ -1828,6 +1830,8 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->applied_geometry.y = c->y;
     c->applied_geometry.width = c->width;
     c->applied_geometry.height = c->height;
+  
+    c->focus = clientSetFocusX11;
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     c->startup_id = NULL;
