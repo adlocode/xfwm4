@@ -189,6 +189,10 @@ getKeycode (DisplayInfo *display_info, const char *str)
                         printf("%s ", xkb_keymap_mod_get_name(keymap, mod));
                     }
                     printf("]\n");
+                  
+                    xkb_keymap_unref(keymap);
+                    xkb_context_unref(ctx);
+                    return keycode;
                 }
             }
         }
@@ -272,6 +276,8 @@ parseKeyString (DisplayInfo *display_info, MyKey * key, const char *str)
     }
 
     key->keycode = getKeycode (display_info, str);
+  
+    g_print ("\nkey->keycode: %d\n", key->keycode);
   
     TRACE ("keycode = 0x%x, modifier = 0x%x", key->keycode, key->modifier);
 }
