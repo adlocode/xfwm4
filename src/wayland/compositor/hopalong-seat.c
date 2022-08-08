@@ -77,7 +77,7 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
   if (server->is_windowed)
     tab_key = XKB_KEY_a;
   else
-    tab_key = XKB_KEY_Tab;
+    tab_key = XKB_KEY_Tab;  
 
 	const xkb_keysym_t *syms;
 	int nsyms = xkb_state_key_get_syms(keyboard->device->keyboard->xkb_state, keycode, &syms);
