@@ -92,8 +92,7 @@ getKeycode (DisplayInfo *display_info, const char *str)
     xkb_keysym_t xkb_keysym;
     int ret;
     char name[200];
-    struct xkb_keymap *keymap = NULL;
-    xkb_keycode_t keycode = 0;
+    struct xkb_keymap *keymap = NULL;  
     xkb_keycode_t min_keycode, max_keycode;
     xkb_mod_index_t num_mods;
 
@@ -132,13 +131,13 @@ getKeycode (DisplayInfo *display_info, const char *str)
     }
 
     printf("keysym: %s (%#x)\n", name, keysym);
-    printf("%-8s %-9s %-8s %-20s %-7s %-s\n",
-           "KEYCODE", "KEY NAME", "LAYOUT", "LAYOUT NAME", "LEVEL#", "MODIFIERS");
+    printf("%-8s %-9s %-8s %-20s %-7s\n",
+           "KEYCODE", "KEY NAME", "LAYOUT", "LAYOUT NAME", "LEVEL#");
 
     min_keycode = xkb_keymap_min_keycode(keymap);
     max_keycode = xkb_keymap_max_keycode(keymap);
     num_mods = xkb_keymap_num_mods(keymap);
-    for (keycode = min_keycode; keycode <= max_keycode; keycode++) {
+    for (xkb_keycode_t keycode = min_keycode; keycode <= max_keycode; keycode++) {
         const char *key_name;
         xkb_layout_index_t num_layouts;
 
@@ -174,26 +173,12 @@ getKeycode (DisplayInfo *display_info, const char *str)
                     continue;
                 }
 
-                num_masks = xkb_keymap_key_get_mods_for_level(
-                    keymap, keycode, layout, level, masks, ARRAY_SIZE(masks)
-                );
-                for (size_t i = 0; i < num_masks; i++) {
-                    xkb_mod_mask_t mask = masks[i];
-
-                    printf("%-8u %-9s %-8u %-20s %-7u [ ",
-                           keycode, key_name, layout + 1, layout_name, level + 1);
-                    for (xkb_mod_index_t mod = 0; mod < num_mods; mod++) {
-                        if ((mask & (1 << mod)) == 0) {
-                            continue;
-                        }
-                        printf("%s ", xkb_keymap_mod_get_name(keymap, mod));
-                    }
-                    printf("]\n");
+                    printf("%-8u %-9s %-8u %-20s %-7u",
+                           keycode, key_name, layout + 1, layout_name, level + 1);                   
                   
                     xkb_keymap_unref(keymap);
                     xkb_context_unref(ctx);
                     return keycode;
-                }
             }
         }
     }
@@ -201,7 +186,7 @@ getKeycode (DisplayInfo *display_info, const char *str)
     err:
     xkb_keymap_unref(keymap);
     xkb_context_unref(ctx);
-    return keycode;
+    return 0;
   }
 }
 

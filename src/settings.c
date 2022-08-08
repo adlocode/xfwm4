@@ -643,7 +643,7 @@ loadKeyBindings (ScreenInfo *screen_info)
     else
     {
       //A hack to make the tabwin work
-      screen_info->params->keys[KEY_CYCLE_WINDOWS].keycode = 15 + 8;
+      screen_info->params->keys[KEY_CYCLE_WINDOWS].keycode = 15;
       screen_info->params->keys[KEY_CYCLE_WINDOWS].modifier = 0x04;
     }
    g_print ("keys3\n");

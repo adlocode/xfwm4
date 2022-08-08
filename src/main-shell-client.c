@@ -270,7 +270,7 @@ static void shell_handle_tabwin (void *data, struct zxfwm_shell *shell, uint32_t
   event->meta.type = XFWM_EVENT_KEY;
   
   event->key.pressed = key_press;
-  event->key.keycode = key + 8;
+  event->key.keycode = key;
   event->key.state = modifiers;
   event->key.root =screen_info->xroot;
   
