@@ -16,9 +16,10 @@
         MA 02110-1301, USA.
 
 
-        oroborus - (c) 2001 Ken Lynch
-        xfwm4    - (c) 2002-2011 Olivier Fourdan,
-                       2008 Jannis Pohlmann
+        oroborus      - (c) 2001 Ken Lynch
+        xfwm4         - (c) 2002-2011 Olivier Fourdan,
+                            2008 Jannis Pohlmann
+        xfwm4-wayland - (c) 2018-2022 adlo
 
  */
 
