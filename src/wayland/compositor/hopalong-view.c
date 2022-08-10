@@ -366,7 +366,7 @@ hopalong_view_focus(struct hopalong_view *view, struct wlr_surface *surface)
 	struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
 	surface = hopalong_view_get_surface(view);
-	if (surface != NULL)
+	if (surface != NULL && keyboard != NULL)
 		wlr_seat_keyboard_notify_enter(seat, surface,
 			keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 
