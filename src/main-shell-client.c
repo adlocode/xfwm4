@@ -213,13 +213,13 @@ static void shell_window_handle_state(void *data,
 }
 
 static void shell_window_handle_done(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+		struct zxfwm_shell_window *shell_window)
 {
 
 }
 
 static void shell_window_handle_closed(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
+		struct zxfwm_shell_window *shell_window)
 {
   Client *c = data;
 
