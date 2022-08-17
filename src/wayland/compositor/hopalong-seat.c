@@ -95,7 +95,7 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
 	      {
           zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
                                   KEY_TAB,
-                                  XFWM_MOD_ALT,
+                                  modifiers,
                                   (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);
         
     
@@ -110,7 +110,7 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
             {
              zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
                                      KEY_TAB,
-                                     XFWM_MOD_ALT,
+                                     WLR_MODIFIER_ALT,
                                      (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);
               cycling = FALSE;
             }

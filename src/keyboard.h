@@ -70,6 +70,7 @@ void                     ungrabButton                           (XfwmDevices *,
                                                                  guint,
                                                                  guint,
                                                                  Window);
+void                     initModifiersWayland                   ();
 void                     initModifiers                          (Display *);
 
 #endif /* INC_KEYBOARD_H */

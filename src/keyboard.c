@@ -265,6 +265,8 @@ parseKeyString (DisplayInfo *display_info, MyKey * key, const char *str)
   
     g_print ("\nkey->keycode: %d\n", key->keycode);
   
+    g_print ("key->modifier: %b\n\n", key->modifier);
+  
     TRACE ("keycode = 0x%x, modifier = 0x%x", key->keycode, key->modifier);
 }
 
@@ -404,6 +406,12 @@ ungrabButton (XfwmDevices *devices, Display *dpy, guint button, guint modifier, 
         xfwm_device_ungrab_button (devices, dpy, button, modifier | LockMask | NumLockMask, w);
         xfwm_device_ungrab_button (devices, dpy, button, modifier | ScrollLockMask | LockMask | NumLockMask, w);
     }
+}
+
+void
+initModifiersWayland ()
+{
+  AltMask = Mod1Mask;
 }
 
 void

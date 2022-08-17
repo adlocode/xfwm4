@@ -973,6 +973,8 @@ g_print ("\ndisplay\n");
 #endif /* HAVE_COMPOSITOR */
 
     //initModifiers (display_info->dpy);
+    
+    initModifiersWayland ();
 
     //setupHandler (TRUE);
     
