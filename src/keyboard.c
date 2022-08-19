@@ -270,6 +270,24 @@ parseKeyString (DisplayInfo *display_info, MyKey * key, const char *str)
     TRACE ("keycode = 0x%x, modifier = 0x%x", key->keycode, key->modifier);
 }
 
+int
+getModifierKeysyms (int modifier, xkb_keysym_t **syms_out)
+{
+  if (modifier & AltMask)
+    {
+      *syms_out = malloc (sizeof(xkb_keysym_t) * 2);
+      (*syms_out)[0] = XKB_KEY_Alt_L;
+      (*syms_out)[1] = XKB_KEY_Alt_R;
+      return 2;
+    }
+  else
+    {
+      *syms_out = malloc (sizeof(xkb_keysym_t));
+      (*syms_out)[0] = 0;
+      return 0;
+    }
+}
+
 gboolean
 grabKey (XfwmDevices *devices, Display *dpy, MyKey *key, Window w)
 {

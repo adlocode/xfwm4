@@ -640,11 +640,7 @@ loadKeyBindings (ScreenInfo *screen_info)
   myScreenUngrabKeys (screen_info);
     myScreenGrabKeys (screen_info);
     }
-    else
-    {
-      //A hack to make the tabwin work
-      screen_info->params->keys[KEY_CYCLE_WINDOWS].keycode = 15;
-    }
+  
    g_print ("keys3\n");
 
     return;

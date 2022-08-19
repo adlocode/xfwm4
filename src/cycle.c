@@ -363,10 +363,50 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
                 }
               else
                 {
-                  if (event->key.state & screen_info->params->keys[KEY_CYCLE_WINDOWS].modifier)
-                    {
-                      cycling = FALSE;
-                    }
+                  struct xkb_context *ctx = NULL;    
+                  xkb_keysym_t xkb_keysym;    
+                  struct xkb_keymap *keymap = NULL;
+                  const char *rules = NULL;
+    const char *model = NULL;
+    const char *layout_ = NULL;
+    const char *variant = NULL;
+    const char *options = NULL;
+                  ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+
+                  struct xkb_rule_names names = {
+                   .rules = rules,
+                   .model = model,
+                   .layout = layout_,
+                   .variant = variant,
+                   .options = options,
+                  };
+                  keymap = xkb_keymap_new_from_names(ctx, &names,
+                                       XKB_KEYMAP_COMPILE_NO_FLAGS);
+                  
+                  struct xkb_state *state = xkb_state_new (keymap);
+                  
+                  xkb_keysym_t *syms, *modifier_syms;
+                  int nsyms = xkb_state_key_get_syms(state, event->key.keycode, &syms);
+                  
+                  for (int i = 0; i < nsyms; i++)
+                  {
+                    int cycle_nsyms = getModifierKeysyms (modifiers, &modifier_syms);
+                    
+                    for (int cycle_i = 0; cycle_i < cycle_nsyms; cycle_i++)
+                      {                        
+                        if (syms[i] == modifier_syms[cycle_i])
+                        {
+                          cycling = FALSE;                          
+                        }
+                        
+                      }
+                    
+                    free (modifier_syms);
+                    
+                  }
+                  xkb_state_unref (state);
+                  xkb_keymap_unref(keymap);
+                    xkb_context_unref(ctx);
                 }
             }
             status = EVENT_FILTER_STOP;

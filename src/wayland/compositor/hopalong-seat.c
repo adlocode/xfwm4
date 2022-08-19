@@ -68,18 +68,12 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
   struct hopalong_keyboard *keyboard = wl_container_of(listener, keyboard, key);
 	struct hopalong_server *server = keyboard->server;
 	struct wlr_event_keyboard_key *event = data;
-	struct wlr_seat *seat = server->seat;
-  xkb_keysym_t tab_key;
+	struct wlr_seat *seat = server->seat; 
 
         /* Translate libinput keycode -> xkbcommon */
 	uint32_t keycode = event->keycode + 8;
   
-  if (server->is_windowed)
-    tab_key = XKB_KEY_a;
-  else
-    tab_key = XKB_KEY_Tab;  
-
-	const xkb_keysym_t *syms;
+  const xkb_keysym_t *syms;
 	int nsyms = xkb_state_key_get_syms(keyboard->device->keyboard->xkb_state, keycode, &syms);
 
 	uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->device->keyboard);
@@ -87,36 +81,11 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
     
   if (server->shell->child.desktop_shell)
   {
-   for (int i = 0; i < nsyms; i++)
-   {
-   if (syms[i] == tab_key && modifiers == WLR_MODIFIER_ALT)
-    {
-        if ((enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
-	      {
-          zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
-                                  KEY_TAB,
-                                  modifiers,
-                                  (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);
-        
-    
-          cycling = TRUE;
-        }
-    }
-    
-      else if ((enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_RELEASED
-               && syms[i] == XKB_KEY_Alt_L)
-        {
-          if (cycling)
-            {
-             zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
-                                     KEY_TAB,
-                                     WLR_MODIFIER_ALT,
-                                     (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);
-              cycling = FALSE;
-            }
-      
-       }   
-   }
+   zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
+                            keycode,
+                            modifiers,
+                            (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);     
+   
   }
 
 	if ((enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED)

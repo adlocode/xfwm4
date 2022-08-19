@@ -53,6 +53,8 @@ gboolean                 getModifierMap                         (const char *,
 void                     parseKeyString                         (DisplayInfo *,
                                                                  MyKey *,
                                                                  const char *);
+int                      getModifierKeysyms                     (int modifier,
+                                                                 xkb_keysym_t **syms_out);
 gboolean                 grabKey                                (XfwmDevices *,
                                                                  Display *,
                                                                  MyKey *,
