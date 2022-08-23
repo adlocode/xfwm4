@@ -367,23 +367,16 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
                   xkb_keysym_t xkb_keysym;    
                   struct xkb_keymap *keymap = NULL;
                   const char *rules = NULL;
-    const char *model = NULL;
-    const char *layout_ = NULL;
-    const char *variant = NULL;
-    const char *options = NULL;
-                  ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-
-                  struct xkb_rule_names names = {
-                   .rules = rules,
-                   .model = model,
-                   .layout = layout_,
-                   .variant = variant,
-                   .options = options,
-                  };
-                  keymap = xkb_keymap_new_from_names(ctx, &names,
-                                       XKB_KEYMAP_COMPILE_NO_FLAGS);
+                  const char *model = NULL;
+                  const char *layout_ = NULL;
+                  const char *variant = NULL;
+                  const char *options = NULL;
                   
-                  struct xkb_state *state = xkb_state_new (keymap);
+                  ctx = display_info->xkb_context;
+
+                  keymap = display_info->xkb_keymap;
+                  
+                  struct xkb_state *state = display_info->xkb_state;
                   
                   xkb_keysym_t *syms, *modifier_syms;
                   int nsyms = xkb_state_key_get_syms(state, event->key.keycode, &syms);
@@ -404,9 +397,7 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
                     free (modifier_syms);
                     
                   }
-                  xkb_state_unref (state);
-                  xkb_keymap_unref(keymap);
-                    xkb_context_unref(ctx);
+                  
                 }
             }
             status = EVENT_FILTER_STOP;

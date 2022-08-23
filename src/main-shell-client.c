@@ -1027,6 +1027,11 @@ g_print ("\ndisplay\n");
         {            
           continue;
         }
+          
+        wl_registry_add_listener (registry, &registry_listener, screen_info);
+        wl_display_roundtrip (display_info->wayland_display);
+        wl_display_roundtrip (display_info->wayland_display);
+        wl_display_roundtrip (display_info->wayland_display);
 
         if (!initSettings (screen_info))
         {
@@ -1034,8 +1039,7 @@ g_print ("\ndisplay\n");
           return -2;
         }
           
-         wl_registry_add_listener (registry, &registry_listener, screen_info);
-         wl_display_roundtrip (display_info->wayland_display);
+         
          //wl_display_roundtrip (display_info->wayland_display);
           
           if (GDK_IS_X11_DISPLAY (display_info->gdisplay))

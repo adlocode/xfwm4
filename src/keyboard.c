@@ -111,21 +111,13 @@ getKeycode (DisplayInfo *display_info, const char *str)
         goto err;
     }
     
-      ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+      ctx = display_info->xkb_context;
     if (!ctx) {
         fprintf(stderr, "Failed to create XKB context\n");
         goto err;
     }
-
-    struct xkb_rule_names names = {
-        .rules = rules,
-        .model = model,
-        .layout = layout_,
-        .variant = variant,
-        .options = options,
-    };
-    keymap = xkb_keymap_new_from_names(ctx, &names,
-                                       XKB_KEYMAP_COMPILE_NO_FLAGS);
+    
+    keymap = display_info->xkb_keymap;
     if (!keymap) {
         fprintf(stderr, "Failed to create XKB keymap\n");
         goto err;
@@ -175,18 +167,14 @@ getKeycode (DisplayInfo *display_info, const char *str)
                 }
 
                     printf("%-8u %-9s %-8u %-20s %-7u",
-                           keycode, key_name, layout + 1, layout_name, level + 1);                   
-                  
-                    xkb_keymap_unref(keymap);
-                    xkb_context_unref(ctx);
+                           keycode, key_name, layout + 1, layout_name, level + 1);
+                    
                     return keycode;
             }
         }
     }
     
-    err:
-    xkb_keymap_unref(keymap);
-    xkb_context_unref(ctx);
+    err:    
     return 0;
   }
 }
