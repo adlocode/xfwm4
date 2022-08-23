@@ -258,7 +258,7 @@ static void shell_handle_finished (void *data, struct zxfwm_shell *shell)
   
 }
 
-static void shell_handle_tabwin (void *data, struct zxfwm_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
+static void shell_handle_key (void *data, struct zxfwm_shell *shell, uint32_t key, uint32_t modifiers, uint32_t key_press)
 {
   ScreenInfo *screen_info = data;
   XfwmEvent *event;
@@ -293,7 +293,7 @@ static void shell_handle_tabwin_destroy (void *data, struct zxfwm_shell *shell)
 struct zxfwm_shell_listener shell_impl = {
   shell_handle_toplevel,
   shell_handle_finished,
-  shell_handle_tabwin,
+  shell_handle_key,
   shell_handle_tabwin_next,
   shell_handle_tabwin_destroy,
 };

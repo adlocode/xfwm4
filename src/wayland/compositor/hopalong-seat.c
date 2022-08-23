@@ -81,7 +81,7 @@ keyboard_handle_key(struct wl_listener *listener, void *data)
     
   if (server->shell->child.desktop_shell)
   {
-   zxfwm_shell_send_tabwin (server->shell->child.desktop_shell,
+   zxfwm_shell_send_key (server->shell->child.desktop_shell,
                             keycode,
                             modifiers,
                             (enum wl_keyboard_key_state) event->state == WL_KEYBOARD_KEY_STATE_PRESSED);     

@@ -54,9 +54,9 @@
       </description>
     </event>
 
-  <event name = "tabwin">
-    <description summary = "tell client to create an alt-tab switcher">
-      Tell the client to create an alt-tab switcher.
+  <event name = "key">
+    <description summary = "key event">
+      Key press or key release event.
     </description>
     <arg name = "key" type = "uint"/>
     <arg name = "modifiers" type = "uint"/>
