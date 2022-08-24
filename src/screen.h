@@ -240,6 +240,8 @@ struct _ScreenInfo
     gboolean use_present;
 
     vblankMode vblank_mode;
+  
+    uint32_t modifiers;
 
 #ifdef HAVE_EPOXY
     gboolean texture_inverted;

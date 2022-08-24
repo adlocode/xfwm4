@@ -263,6 +263,7 @@ static void shell_handle_key (void *data, struct zxfwm_shell *shell, uint32_t ke
   ScreenInfo *screen_info = data;
   XfwmEvent *event;
   eventFilterStatus status;
+  uint32_t modifiers_compose = 0;  
   g_print ("\ntabwin");
   
   event = g_new0 (XfwmEvent, 1);
@@ -273,6 +274,27 @@ static void shell_handle_key (void *data, struct zxfwm_shell *shell, uint32_t ke
   event->key.keycode = key;
   event->key.state = modifiers;
   event->key.root =screen_info->xroot;
+  
+  const xkb_keysym_t *syms;
+	int nsyms = xkb_state_key_get_syms(screen_info->display_info->xkb_state, key, &syms);
+  
+  for (int i = 0; i < nsyms; i++)
+    {
+      if ((syms[i] == XKB_KEY_Alt_L) || (syms[i] == XKB_KEY_Alt_R))
+        {
+          modifiers_compose |= AltMask;          
+        }
+    }
+  
+  
+  if (key_press)
+    {
+      screen_info->modifiers |= modifiers_compose;
+    }
+  else
+    {
+      screen_info->modifiers &= ~modifiers_compose;
+    }
   
   status = eventFilterIterate (screen_info->display_info->xfilter, event);
   

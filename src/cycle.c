@@ -363,41 +363,10 @@ clientCycleEventFilter (XfwmEvent *event, gpointer data)
                 }
               else
                 {
-                  struct xkb_context *ctx = NULL;    
-                  xkb_keysym_t xkb_keysym;    
-                  struct xkb_keymap *keymap = NULL;
-                  const char *rules = NULL;
-                  const char *model = NULL;
-                  const char *layout_ = NULL;
-                  const char *variant = NULL;
-                  const char *options = NULL;
-                  
-                  ctx = display_info->xkb_context;
-
-                  keymap = display_info->xkb_keymap;
-                  
-                  struct xkb_state *state = display_info->xkb_state;
-                  
-                  xkb_keysym_t *syms, *modifier_syms;
-                  int nsyms = xkb_state_key_get_syms(state, event->key.keycode, &syms);
-                  
-                  for (int i = 0; i < nsyms; i++)
-                  {
-                    int cycle_nsyms = getModifierKeysyms (modifiers, &modifier_syms);
-                    
-                    for (int cycle_i = 0; cycle_i < cycle_nsyms; cycle_i++)
-                      {                        
-                        if (syms[i] == modifier_syms[cycle_i])
-                        {
-                          cycling = FALSE;                          
-                        }
-                        
-                      }
-                    
-                    free (modifier_syms);
-                    
-                  }
-                  
+                  if (!(screen_info->modifiers & modifiers))
+                    {
+                      cycling = FALSE;
+                    }
                 }
             }
             status = EVENT_FILTER_STOP;
