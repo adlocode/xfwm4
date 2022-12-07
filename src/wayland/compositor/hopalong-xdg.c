@@ -317,9 +317,7 @@ hopalong_xdg_surface_commit(struct wl_listener *listener, void *data)
 	 */
 	view->using_csd = false;
 	if (view->xdg_surface->current.geometry.x || view->xdg_surface->current.geometry.y)
-		view->using_csd = true;
-  
-  view->using_csd = true;
+		view->using_csd = true;  
 }
 
 static void
@@ -389,8 +387,7 @@ hopalong_xdg_shell_setup(struct hopalong_server *server)
 	server->new_xdg_surface.notify = hopalong_xdg_new_surface;
 	wl_signal_add(&server->xdg_shell->events.new_surface, &server->new_xdg_surface);
 
-  //This code commented out as a workaround to a bug
-	//hopalong_decoration_setup(server);
+  hopalong_decoration_setup(server);
 }
 
 /*
