@@ -165,8 +165,15 @@ hopalong_view_generate_title_texture(struct hopalong_output *output, struct hopa
 	const char *title_data = hopalong_view_getprop(view, HOPALONG_VIEW_TITLE);
 	if (title_data == NULL)
 		title_data = hopalong_view_getprop(view, HOPALONG_VIEW_APP_ID);
-	if (title_data != NULL)
-		strlcpy(title, title_data, sizeof title);
+  
+  /* Fix for gedit dialog's empty title which causes an assertion failure */
+  if (title_data == NULL || title_data[0] == '\0')
+    {
+      view->title_dirty = false;
+      return false;
+    }
+  
+  strlcpy (title, title_data, sizeof title);
 
 	float scale = output->wlr_output->scale;
 	int w = 400;
