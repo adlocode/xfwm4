@@ -1,7 +1,7 @@
 compositor_inc = include_directories('.')
 
 
-hopalong_sources = [
+xfwm4_wayland_sources = [
   'hopalong-server.c',
   'hopalong-output.c',
   'hopalong-xdg.c',
@@ -22,7 +22,7 @@ hopalong_sources = [
   'xfwm-shell.c'
 ]
 
-hopalong_dependencies = [
+xfwm4_wayland_dependencies = [
   server_protos,
   xfwm_server_protos,
   wayland_server,
@@ -36,12 +36,12 @@ hopalong_dependencies = [
 ]
 
 if lacking_libc
-  hopalong_dependencies += bsd_overlay
+  xfwm4_wayland_dependencies += bsd_overlay
 endif
 
-hopalong_exe = executable('hopalong',
-  hopalong_sources,
-  dependencies: hopalong_dependencies,
+xfwm4_wayland_exe = executable('xfwm4-wayland',
+  xfwm4_wayland_sources,
+  dependencies: xfwm4_wayland_dependencies,
   include_directories: incdir,
   install: true
 )
