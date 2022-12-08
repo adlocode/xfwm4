@@ -102,10 +102,13 @@ render_texture(struct wlr_output *output, struct wlr_box *box, struct wlr_textur
 	};
 	scale_box_coords(&scalebox, output->scale);
 
-	struct wlr_gles2_texture_attribs attribs;
-	wlr_gles2_texture_get_attribs(texture, &attribs);
-	glBindTexture(attribs.target, attribs.tex);
-	glTexParameteri(attribs.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (wlr_renderer_is_gles2 (renderer))
+    {
+      struct wlr_gles2_texture_attribs attribs;
+	    wlr_gles2_texture_get_attribs(texture, &attribs);
+	    glBindTexture(attribs.target, attribs.tex);
+	    glTexParameteri(attribs.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
 
 	float matrix[9];
 	wlr_matrix_project_box(matrix, &scalebox,
