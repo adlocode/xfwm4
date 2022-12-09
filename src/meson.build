@@ -1,4 +1,4 @@
-xfwm4_wayland_shell_sources = [
+xfwm4_sources = [
   'client.c',
   'compositor.c',
   'cycle.c',
@@ -12,6 +12,7 @@ xfwm4_wayland_shell_sources = [
   'icons.c',
   'keyboard.c',
   'main-shell-client.c',
+  'main.c',
   'menu.c',
   'misc.c',
   'moveresize.c',
@@ -36,7 +37,7 @@ xfwm4_wayland_shell_sources = [
   'xsync.c',  
 ]
 
-xfwm4_wayland_shell_dependencies = [
+xfwm4_dependencies = [
   xfwm_client_protos,
   wayland_server,
   wayland_client,
@@ -59,9 +60,9 @@ xfwm4_wayland_shell_dependencies = [
   m_dep,
 ]
 
-xfwm4_wayland_shell_exe = executable('xfwm4-wayland-shell',
-  xfwm4_wayland_shell_sources,
-  dependencies: xfwm4_wayland_shell_dependencies,
+xfwm4_exe = executable('xfwm4',
+  xfwm4_sources,
+  dependencies: xfwm4_dependencies,
   include_directories: incdir,
   link_with: xfwm_common,
   install: true

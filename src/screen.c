@@ -362,6 +362,8 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->monitors_index = NULL;
     myScreenInvalidateMonitorCache (screen_info);
     myScreenRebuildMonitorIndex (screen_info);
+  
+  g_print ("exit screen init\n");
 
     return (screen_info);
 }

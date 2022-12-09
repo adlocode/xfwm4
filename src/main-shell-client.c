@@ -583,7 +583,7 @@ void global_remove (void               *data,
 
 }
 
-struct wl_registry_listener registry_listener =
+struct wl_registry_listener zregistry_listener =
 {
   .global = global_add,
   .global_remove = global_remove
@@ -964,8 +964,9 @@ init_compositor_screen (ScreenInfo *screen_info)
 }
 #endif /* HAVE_COMPOSITOR */
 
+/* deprecated */
 static int
-initialize (gboolean replace_wm)
+shell_initialize (gboolean replace_wm)
 {
     DisplayInfo *display_info;
     gint i, nscreens, default_screen;
@@ -979,14 +980,7 @@ initialize (gboolean replace_wm)
     initMenuEventWin ();
     clientClearFocus (NULL);
     display_info = myDisplayInit (gdk_display_get_default ());
-  //g_print ("\ndisplay\n");
-    //wl_display_roundtrip (display_info->wayland_display);
-    //wl_display_roundtrip (display_info->wayland_display);
   
-  //if (gdk_wayland_display_query_registry (display_info->gdisplay, "zwlr_foreign_toplevel_manager_v1" == TRUE))
-    //{
-      //g_print ("\nforeign toplevel\n");
-    //}
 g_print ("\ndisplay\n");
 #ifdef HAVE_COMPOSITOR
     display_info->enable_compositor = compositor;
@@ -994,19 +988,30 @@ g_print ("\ndisplay\n");
     display_info->enable_compositor = FALSE;
 #endif /* HAVE_COMPOSITOR */
 
-    //initModifiers (display_info->dpy);
-    
-    initModifiersWayland ();
+    if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
+      initModifiers (display_info->dpy);
+      setupHandler (TRUE);
+    }
+    else if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
+      initModifiersWayland ();    
 
-    //setupHandler (TRUE);
-    
-  //wl_display_flush (display_info->wayland_display);
-  //wl_display_roundtrip (display_info->wayland_display);
     registry = wl_display_get_registry (display_info->wayland_display);
+      }
 
-    //nscreens = ScreenCount (display_info->dpy);
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
+  nscreens = ScreenCount (display_info->dpy);
+      default_screen = DefaultScreen (display_info->dpy);
+      
+    }
+  else if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
     nscreens = 1;
-    //default_screen = DefaultScreen (display_info->dpy);
+    default_screen = 0;
+    }
+    
     for(i = 0; i < nscreens; i++)
     {
         ScreenInfo *screen_info;
@@ -1014,18 +1019,18 @@ g_print ("\ndisplay\n");
         Window temp_xwindow;
         GdkWindow *screen_window;
 
-        //if (i == default_screen)
-        //{
+        if (i == default_screen)
+        {
             gscr = gdk_display_get_default_screen (display_info->gdisplay);
-        //}
- /*       else
+        }
+        else
         {
             /* create temp 1x1 child window on this screen */
-/*            temp_xwindow = XCreateSimpleWindow (display_info->dpy,
+            temp_xwindow = XCreateSimpleWindow (display_info->dpy,
                                                 RootWindow (display_info->dpy, i),
                                                 0, 0, 1, 1, 0, 0, 0);
             /* allocate new GdkWindow with GdkScreen for this window */
-/*            screen_window =
+            screen_window =
                 gdk_x11_window_foreign_new_for_display (display_info->gdisplay,
                                                         temp_xwindow);
             XDestroyWindow (display_info->dpy, temp_xwindow);
@@ -1039,9 +1044,9 @@ g_print ("\ndisplay\n");
             gscr = gdk_window_get_screen (screen_window);
 
             /* foreign windows have 2 references */
-/*            g_object_unref (screen_window);
             g_object_unref (screen_window);
-        }*/
+            g_object_unref (screen_window);
+        }
         screen_info = myScreenInit (display_info, gscr, MAIN_EVENT_MASK, replace_wm);
 
          g_print ("mid initialize\n");
@@ -1049,11 +1054,14 @@ g_print ("\ndisplay\n");
         {            
           continue;
         }
-          
-        wl_registry_add_listener (registry, &registry_listener, screen_info);
-        wl_display_roundtrip (display_info->wayland_display);
-        wl_display_roundtrip (display_info->wayland_display);
-        wl_display_roundtrip (display_info->wayland_display);
+        
+        if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+        {
+          wl_registry_add_listener (registry, &zregistry_listener, screen_info);
+          wl_display_roundtrip (display_info->wayland_display);
+          wl_display_roundtrip (display_info->wayland_display);
+          wl_display_roundtrip (display_info->wayland_display);
+        }
 
         if (!initSettings (screen_info))
         {
@@ -1061,8 +1069,7 @@ g_print ("\ndisplay\n");
           return -2;
         }
           
-         
-         //wl_display_roundtrip (display_info->wayland_display);
+                 
           
           if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
             {
@@ -1070,11 +1077,16 @@ g_print ("\ndisplay\n");
         if (display_info->enable_compositor)
         {
             init_compositor_screen (screen_info);
-        }}
+        }
 #endif /* HAVE_COMPOSITOR */
-        //sn_init_display (screen_info);
+        sn_init_display (screen_info);
+        }
+        
         myDisplayAddScreen (display_info, screen_info);
-        /*screen_info->current_ws = getNetCurrentDesktop (display_info, screen_info->xroot);
+      
+        if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
+        screen_info->current_ws = getNetCurrentDesktop (display_info, screen_info->xroot);
         setUTF8StringHint (display_info, screen_info->xfwm4_win, NET_WM_NAME, "Xfwm4");
         setNetSupportedHint (display_info, screen_info->xroot, screen_info->xfwm4_win);
         setNetDesktopInfo (display_info, screen_info->xroot, screen_info->current_ws,
@@ -1087,7 +1099,8 @@ g_print ("\ndisplay\n");
 
         initPerScreenCallbacks (screen_info);
 
-        XDefineCursor (display_info->dpy, screen_info->xroot, myDisplayGetCursorRoot(display_info));*/
+        XDefineCursor (display_info->dpy, screen_info->xroot, myDisplayGetCursorRoot(display_info));
+            }
     
         }
 
@@ -1098,7 +1111,11 @@ g_print ("\ndisplay\n");
     }
     display_info->xfilter = eventFilterInit (display_info->devices, (gpointer) display_info);
     eventFilterPush (display_info->xfilter, xfwm4_event_filter, (gpointer) display_info);
-    //initPerDisplayCallbacks (display_info);
+  
+    if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
+    initPerDisplayCallbacks (display_info);
+            }
       
     g_print ("exit initialize\n");
 
@@ -1124,8 +1141,9 @@ init_pango_cache (void)
     gtk_widget_destroy (GTK_WIDGET (tmp_win));
 }
 
+/* deprecated */
 int
-main (int argc, char **argv)
+shell_main (int argc, char **argv)
 {
     gboolean version = FALSE;
     gboolean replace_wm = FALSE;
@@ -1227,7 +1245,7 @@ main (int argc, char **argv)
     }
     init_pango_cache ();
 
-    status = initialize (replace_wm);
+    status = shell_initialize (replace_wm);
    
      /*
        status  < 0   =>   Error, cancel execution

@@ -276,7 +276,7 @@ eventFilterSetup *
 eventFilterInit (XfwmDevices *devices, gpointer data)
 {
     eventFilterSetup *setup;
-g_print ("enter event filter init");
+g_print ("enter event filter init\n");
     setup = g_new0 (eventFilterSetup, 1);
     setup->filterstack = NULL;
     setup->devices = devices;

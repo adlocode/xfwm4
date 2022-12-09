@@ -1067,7 +1067,7 @@ launch_desktop_shell_process(void *data)
   
   wlr_log (WLR_INFO, "\nlaunch desktop shell\n");
 
-  client = wet_get_binary_path ("xfwm4-wayland-shell");
+  client = wet_get_binary_path ("xfwm4");
 
   server->child.client = weston_client_start (server, client);
 

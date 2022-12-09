@@ -30,6 +30,7 @@
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkwayland.h>
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4ui/libxfce4ui.h>
@@ -46,6 +47,11 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <string.h>
+
+#include <wayland-client.h>
+#include <protocol/xfway-shell-client-protocol.h>
+#include <protocol/wlr-foreign-toplevel-management-unstable-v1-client-protocol.h>
+#include "protocol/wlr-layer-shell-unstable-v1-client-protocol.h"
 
 #include "display.h"
 #include "screen.h"
@@ -87,12 +93,26 @@ static gboolean compositor = TRUE;
 static vblankMode vblank_mode = VBLANK_AUTO;
 #define XFWM4_ERROR      (xfwm4_error_quark ())
 
+/* From main-shell-client.c */
+
+void global_add (void               *data,
+                 struct wl_registry *registry,
+                 uint32_t            name,
+                 const char         *interface,
+                 uint32_t            version);
+
+void global_remove (void               *data,
+                    struct wl_registry *registry,
+                    uint32_t            name);
+
 static GQuark
 xfwm4_error_quark (void)
 {
   return g_quark_from_static_string ("xfwm4-error-quark");
 }
 #endif /* HAVE_COMPOSITOR */
+
+static struct wl_registry *registry = NULL;
 
 #ifdef DEBUG
 static gboolean
@@ -144,6 +164,12 @@ setupLog (gboolean debug)
     return TRUE;
 }
 #endif /* DEBUG */
+
+struct wl_registry_listener registry_listener =
+{
+  .global = global_add,
+  .global_remove = global_remove
+};
 
 static void
 handleSignal (int sig)
@@ -541,12 +567,30 @@ initialize (gboolean replace_wm)
     display_info->enable_compositor = FALSE;
 #endif /* HAVE_COMPOSITOR */
 
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {  
     initModifiers (display_info->dpy);
 
     setupHandler (TRUE);
+    }
+  else if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
+      initModifiersWayland ();    
 
+    registry = wl_display_get_registry (display_info->wayland_display);
+      }
+
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {  
     nscreens = ScreenCount (display_info->dpy);
     default_screen = DefaultScreen (display_info->dpy);
+    }
+  else if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
+    nscreens = 1;
+    default_screen = 0;
+    }
+  
     for(i = 0; i < nscreens; i++)
     {
         ScreenInfo *screen_info;
@@ -588,19 +632,38 @@ initialize (gboolean replace_wm)
         {
             continue;
         }
+      
+        if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+        {
+          wl_registry_add_listener (registry, &registry_listener, screen_info);
+          wl_display_roundtrip (display_info->wayland_display);
+          wl_display_roundtrip (display_info->wayland_display);
+          wl_display_roundtrip (display_info->wayland_display);
+        }
 
         if (!initSettings (screen_info))
         {
             return -2;
         }
 #ifdef HAVE_COMPOSITOR
+      if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
         if (display_info->enable_compositor)
         {
             init_compositor_screen (screen_info);
         }
+            }
 #endif /* HAVE_COMPOSITOR */
+      
+      if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
         sn_init_display (screen_info);
+            }
+      
         myDisplayAddScreen (display_info, screen_info);
+      
+      if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
         screen_info->current_ws = getNetCurrentDesktop (display_info, screen_info->xroot);
         setUTF8StringHint (display_info, screen_info->xfwm4_win, NET_WM_NAME, "Xfwm4");
         setNetSupportedHint (display_info, screen_info->xroot, screen_info->xfwm4_win);
@@ -615,6 +678,7 @@ initialize (gboolean replace_wm)
         initPerScreenCallbacks (screen_info);
 
         XDefineCursor (display_info->dpy, screen_info->xroot, myDisplayGetCursorRoot(display_info));
+            }
     }
 
     /* No screen to manage, give up */
@@ -624,7 +688,19 @@ initialize (gboolean replace_wm)
     }
     display_info->xfilter = eventFilterInit (display_info->devices, (gpointer) display_info);
     eventFilterPush (display_info->xfilter, xfwm4_event_filter, (gpointer) display_info);
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+            {
     initPerDisplayCallbacks (display_info);
+            }
+  
+  if (GDK_IS_X11_DISPLAY (display_info->gdisplay))
+    {
+      g_print ("Display: X11\n");
+    }
+  else if (GDK_IS_WAYLAND_DISPLAY (display_info->gdisplay))
+    {
+      g_print ("Display: Wayland\n");
+    }
 
     return sessionStart (display_info);
 }
@@ -713,7 +789,7 @@ main (int argc, char **argv)
      * any other display server (like when running nested within a
      * Wayland compositor).
      */
-    gdk_set_allowed_backends ("x11");
+    //gdk_set_allowed_backends ("x11");
 
 #ifndef HAVE_XI2
     /* Disable XI2 in GDK */
@@ -739,6 +815,8 @@ main (int argc, char **argv)
     setupLog (debug);
 #endif /* DEBUG */
     DBG ("xfwm4 starting");
+  
+    g_print ("%s", "xfwm4 starting\n");
 
     gtk_init (&argc, &argv);
 
@@ -767,6 +845,11 @@ main (int argc, char **argv)
             break;
         case 0:
         case 1:
+      
+            /* test window */
+            GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+            gtk_widget_show (window);
+      
             /* enter GTK main loop */
             gtk_main ();
             break;
@@ -775,7 +858,7 @@ main (int argc, char **argv)
             exit (1);
             break;
     }
-    cleanUp ();
+    //cleanUp ();
     DBG ("xfwm4 terminated");
     return 0;
 }
