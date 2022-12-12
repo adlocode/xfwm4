@@ -34,9 +34,12 @@ From source:
     % make install
     
 Compiling wlroots compositor:
+
+The Wayland compositor must be installed in order to be used.
     
     % meson build
     % ninja -C build
+    % ninja -C build install
 
 From release tarball:
 
