@@ -26,6 +26,8 @@ See [NEWS](https://gitlab.xfce.org/xfce/xfwm4/-/blob/master/NEWS) for details on
 [xfwm4 tags](https://gitlab.xfce.org/xfce/xfwm4/-/tags)
 ### Installation
 
+The Wayland compositor must be installed in order to be used.
+
 From source: 
 
     % cd xfwm4
@@ -34,8 +36,6 @@ From source:
     % make install
     
 Compiling wlroots compositor:
-
-The Wayland compositor must be installed in order to be used.
     
     % meson build
     % ninja -C build
