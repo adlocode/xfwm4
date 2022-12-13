@@ -1,5 +1,4 @@
-/*
- * Hopalong - a friendly Wayland compositor
+/* 
  * Copyright (c) 2020 Ariadne Conill <ariadne@dereferenced.org>
  *
  * Copyright (C) 2018 - 2022 adlo
@@ -16,6 +15,19 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>
+ * 
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ * 
+ *    Copyright (c) 2020 Ariadne Conill <ariadne@dereferenced.org>
+ *
+ *    Permission to use, copy, modify, and/or distribute this software for any
+ *    purpose with or without fee is hereby granted, provided that the above
+ *    copyright notice and this permission notice appear in all copies.
+ *
+ *    This software is provided 'as is' and without any warranty, express or
+ *    implied.  In no event shall the authors be liable for any damages arising
+ *    from the use of this software.
  */
 
 #define _GNU_SOURCE
