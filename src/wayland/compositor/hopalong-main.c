@@ -202,6 +202,8 @@ main(int argc, char *argv[], const char *envp[])
 		fprintf(stderr, "Failed to open socket for Wayland clients.\n");
 		return EXIT_FAILURE;
 	}
+  
+  xfwm_server_shell_init (server, argc, argv);
 
 	wlr_log(WLR_INFO, "Listening for Wayland clients at: %s", socket);
 
@@ -212,8 +214,6 @@ main(int argc, char *argv[], const char *envp[])
 		wlr_log(WLR_INFO, "Using $HOME/.hopalong_init for session leader");
 		launch_session_leader(envp, socket, server->wlr_xwayland->display_name, "sh ~/.hopalong_init");
 	}  
-  
-  xfwm_server_shell_init (server, argc, argv);
 
 	if (!hopalong_server_run(server))
 	{
