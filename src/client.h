@@ -361,6 +361,7 @@ struct _Client
                    Client         *c,
                    guint32         timestamp,
                    unsigned short  flags);
+    void (*close) (Client *c);
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     /* Startup notification */
@@ -447,6 +448,8 @@ void                     clientActivate                         (Client *,
                                                                  guint32,
                                                                  gboolean);
 void                     clientClose                            (Client *);
+void                     clientCloseX11                         (Client *);
+void                     clientCloseWayland                     (Client *);
 void                     clientKill                             (Client *);
 void                     clientTerminate                        (Client *);
 void                     clientEnterContextMenuState            (Client *);

@@ -1681,6 +1681,7 @@ clientFrameWayland (ScreenInfo *screen_info, struct zxfwm_shell_window *shell_wi
     c->applied_geometry.height = c->height;
   
     c->focus = clientSetFocusWayland;
+    c->close = clientCloseWayland;
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     c->startup_id = NULL;
@@ -1832,6 +1833,7 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->applied_geometry.height = c->height;
   
     c->focus = clientSetFocusX11;
+    c->close = clientCloseX11;
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     c->startup_id = NULL;
@@ -2806,7 +2808,7 @@ clientActivate (Client *c, guint32 timestamp, gboolean source_is_application)
 }
 
 void
-clientClose (Client *c)
+clientCloseX11 (Client *c)
 {
     ScreenInfo *screen_info;
     DisplayInfo *display_info;
@@ -2832,6 +2834,18 @@ clientClose (Client *c)
     {
         clientKill (c);
     }
+}
+
+void
+clientCloseWayland (Client *c)
+{
+  zxfwm_shell_window_close (c->shell_window);
+}
+
+void
+clientClose (Client *c)
+{
+   c->close (c);
 }
 
 void

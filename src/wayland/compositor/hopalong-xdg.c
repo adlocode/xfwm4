@@ -38,6 +38,8 @@
 
 static void xfwm_shell_window_handle_focus (struct wl_listener *listener,
                                             void *data);
+static void xfwm_shell_window_handle_close (struct wl_listener *listener,
+                                            void               *data);
 
 static struct hopalong_view *active_view = NULL;
 
@@ -56,7 +58,10 @@ hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
   
   view->shell_window_request_focus.notify = xfwm_shell_window_handle_focus;
   wl_signal_add(&view->shell_window->events.shell_request_focus,
-                &view->shell_window_request_focus);  
+                &view->shell_window_request_focus);
+  view->shell_window_request_close.notify = xfwm_shell_window_handle_close;
+  wl_signal_add (&view->shell_window->events.request_close,
+                 &view->shell_window_request_close);
 
 	const char *title_data = hopalong_view_getprop(view, HOPALONG_VIEW_TITLE);
 	if (title_data == NULL)
@@ -248,6 +253,16 @@ static void xfwm_shell_window_handle_focus (struct wl_listener *listener,
   view = wl_container_of (listener, view, shell_window_request_focus);
   
   hopalong_view_focus (view, view->xdg_surface->surface);
+}
+
+static void xfwm_shell_window_handle_close (struct wl_listener *listener,
+                                            void               *data)
+{
+  struct hopalong_view *view;
+    
+  view = wl_container_of (listener, view, shell_window_request_close);
+  
+  hopalong_view_close (view);
 }
 
 static bool

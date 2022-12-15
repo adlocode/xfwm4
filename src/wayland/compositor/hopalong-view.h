@@ -111,6 +111,7 @@ struct hopalong_view {
 	struct wl_listener surface_commit;
   struct wl_listener shell_window_request_focus;
   struct wl_listener shell_window_request_raise;
+  struct wl_listener shell_window_request_close;
 	bool mapped;
 	int x, y;
 
