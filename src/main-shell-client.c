@@ -320,105 +320,6 @@ struct zxfwm_shell_listener shell_impl = {
   shell_handle_tabwin_destroy,
 };
 
-static void toplevel_handle_title(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
-		const char *title)
-{
-  Client *c = data;
-  if (c->name)
-    g_free (c->name);
-  c->name = g_strdup (title);
-  g_print (c->name);
-}
-
-static void toplevel_handle_app_id(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
-		const char *app_id)
-{
-
-}
-
-static uint32_t array_to_state(struct wl_array *array) {
-	uint32_t state = 0;
-	uint32_t *entry;
-	wl_array_for_each(entry, array) {
-		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_MAXIMIZED)
-			state |= TOPLEVEL_STATE_MAXIMIZED;
-		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_MINIMIZED)
-			state |= TOPLEVEL_STATE_MINIMIZED;
-		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_ACTIVATED)
-			state |= TOPLEVEL_STATE_ACTIVATED;
-		if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_FULLSCREEN)
-			state |= TOPLEVEL_STATE_FULLSCREEN;
-	}
-
-	return state;
-}
-
-static void toplevel_handle_state(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel,
-		struct wl_array *state) {
-	Client *c = data;
-	uint32_t s = array_to_state(state);
-
-  if (s & TOPLEVEL_STATE_ACTIVATED){
-    clientUpdateFocus (c->screen_info, c, NO_FOCUS_FLAG);
-    g_print ("activate\n");
-  }
-}
-
-static void toplevel_handle_done(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
-{
-
-}
-
-static void toplevel_handle_closed(void *data,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
-{
-  Client *c = data;
-
-  //if (c->name)
-    //g_free (c->name);
-
-  clientUnframeWayland (c, FALSE);
-}
-
-static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_impl = {
-	.title = toplevel_handle_title,
-	.app_id = toplevel_handle_app_id,
-	.output_enter = NULL,
-	.output_leave = NULL,
-	.state = toplevel_handle_state,
-	.done = toplevel_handle_done,
-	.closed = toplevel_handle_closed,
-};
-
-static void toplevel_manager_handle_toplevel(void *data,
-		struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager,
-		struct zwlr_foreign_toplevel_handle_v1 *zwlr_toplevel)
-{
-  ScreenInfo *screen_info = data;
-  Client *c;
-  
-  g_print ("window opened");
-
-  c = clientFrameWayland (screen_info, zwlr_toplevel, FALSE);
-
-  zwlr_foreign_toplevel_handle_v1_add_listener (zwlr_toplevel, &toplevel_impl,
-                                                c);
-}
-
-static void toplevel_manager_handle_finished(void *data,
-		struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager) {
-	zwlr_foreign_toplevel_manager_v1_destroy(toplevel_manager);
-}
-
-static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_impl = {
-	.toplevel = toplevel_manager_handle_toplevel,
-	.finished = toplevel_manager_handle_finished,
-};
-
 static void
 wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard,
                uint32_t format, int32_t fd, uint32_t size)
@@ -544,16 +445,6 @@ void global_add (void               *data,
 
       zxfwm_shell_add_listener (shell, &shell_impl, screen_info);
     }
-  else if (strcmp(interface,
-			"zwlr_foreign_toplevel_manager_v1") == 0) {
-		screen_info->toplevel_manager = wl_registry_bind(registry, name,
-				&zwlr_foreign_toplevel_manager_v1_interface,
-				2);
-
-    zwlr_foreign_toplevel_manager_v1_add_listener(screen_info->toplevel_manager,
-				&toplevel_manager_impl, screen_info);
-        g_print ("foreign-toplevel\n");
-      }
   else if (strcmp (interface, "zwlr_layer_shell_v1") == 0)
     {
       screen_info->layer_shell = wl_registry_bind (registry, name, &zwlr_layer_shell_v1_interface, 1);

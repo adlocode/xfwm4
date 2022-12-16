@@ -29,6 +29,7 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 
@@ -112,6 +113,7 @@ struct hopalong_view {
   struct wl_listener shell_window_request_focus;
   struct wl_listener shell_window_request_raise;
   struct wl_listener shell_window_request_close;
+  struct wl_listener toplevel_handle_request_activate;
 	bool mapped;
 	int x, y;
 
@@ -133,6 +135,8 @@ struct hopalong_view {
 	bool hide_title_bar;
   
   ShellWindow *shell_window;
+  
+  struct wlr_foreign_toplevel_handle_v1 *toplevel_handle;
 };
 
 struct hopalong_generated_textures {

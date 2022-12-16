@@ -33,8 +33,9 @@
 //#include <wlr/util/log.h>
 #include "util/signal.h"
 #include <protocol/xfway-shell-protocol.h>
+#include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 
-#define FOREIGN_TOPLEVEL_MANAGEMENT_V1_VERSION 1
+#define XFWM_SHELL_V1_VERSION 1
 
 static const struct zxfwm_shell_window_interface toplevel_handle_impl;
 
@@ -1157,6 +1158,26 @@ static void handle_display_destroy(struct wl_listener *listener, void *data) {
 	xfwm_shell_destroy(manager);
 }
 
+static void handle_toplevel_handle_request_activate (struct wl_listener *listener,
+                                                     void               *data)
+{
+  struct hopalong_view *view = wl_container_of (listener, view,
+                                                toplevel_handle_request_activate);
+  
+  hopalong_view_focus (view, view->xdg_surface->surface);
+}
+
+void foreign_toplevel_handle_create (struct hopalong_view *view)
+{
+  view->toplevel_handle = wlr_foreign_toplevel_handle_v1_create (view->shell_window->manager->foreign_toplevel_manager);
+  if (!view->toplevel_handle)
+    return;
+  
+  view->toplevel_handle_request_activate.notify = handle_toplevel_handle_request_activate;
+  wl_signal_add (&view->toplevel_handle->events.request_activate,
+                 &view->toplevel_handle_request_activate);
+}
+
 Shell *xfwm_shell_create(struct hopalong_server *server,
 		                                 struct wl_display *display)
 {
@@ -1176,13 +1197,15 @@ Shell *xfwm_shell_create(struct hopalong_server *server,
   
 	manager->global =  wl_global_create(display,
 			&zxfwm_shell_interface,
-			FOREIGN_TOPLEVEL_MANAGEMENT_V1_VERSION, manager,
+			XFWM_SHELL_V1_VERSION, manager,
 			bind_desktop_shell);
                                      
  if (!manager->global) {
 		free(manager);
 		return NULL;
-	} 
+	}
+  
+  manager->foreign_toplevel_manager = wlr_foreign_toplevel_manager_v1_create (display);
                                   
   wlr_log (WLR_INFO, "\ncreate shell\n");
     

@@ -40,6 +40,7 @@ static void xfwm_shell_window_handle_focus (struct wl_listener *listener,
                                             void *data);
 static void xfwm_shell_window_handle_close (struct wl_listener *listener,
                                             void               *data);
+void foreign_toplevel_handle_create (struct hopalong_view *view);
 
 static struct hopalong_view *active_view = NULL;
 
@@ -61,7 +62,7 @@ hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
                 &view->shell_window_request_focus);
   view->shell_window_request_close.notify = xfwm_shell_window_handle_close;
   wl_signal_add (&view->shell_window->events.request_close,
-                 &view->shell_window_request_close);
+                 &view->shell_window_request_close);  
 
 	const char *title_data = hopalong_view_getprop(view, HOPALONG_VIEW_TITLE);
 	if (title_data == NULL)
@@ -71,6 +72,11 @@ hopalong_xdg_surface_map(struct wl_listener *listener, void *data)
   
   if (view->shell_window)
     xfwm_shell_window_set_title (view->shell_window, title);
+  
+  foreign_toplevel_handle_create (view);
+  
+  if (view->toplevel_handle)
+    wlr_foreign_toplevel_handle_v1_set_title (view->toplevel_handle, title);
 
 	hopalong_view_focus(view, view->xdg_surface->surface);
 }
@@ -83,6 +89,8 @@ hopalong_xdg_surface_unmap(struct wl_listener *listener, void *data)
 	struct hopalong_view *view = wl_container_of(listener, view, unmap);
   
   xfwm_shell_window_destroy (view->shell_window);
+  
+  wlr_foreign_toplevel_handle_v1_destroy (view->toplevel_handle);
   
   wl_list_remove (&view->shell_window_request_focus.link);
   
@@ -126,6 +134,9 @@ hopalong_xdg_toplevel_set_title(struct wl_listener *listener, void *data)
   
   if (view->shell_window)
     xfwm_shell_window_set_title (view->shell_window, title);
+  
+  if (view->toplevel_handle)
+    wlr_foreign_toplevel_handle_v1_set_title (view->toplevel_handle, title);
 }
 
 static void
@@ -240,6 +251,11 @@ hopalong_xdg_toplevel_set_activated(struct hopalong_view *view, bool activated)
     xfwm_shell_window_set_activated (active_view->shell_window, false);
   
   xfwm_shell_window_set_activated (view->shell_window, activated);
+  
+  if (active_view)
+    wlr_foreign_toplevel_handle_v1_set_activated (active_view->toplevel_handle, false);
+  
+  wlr_foreign_toplevel_handle_v1_set_activated (view->toplevel_handle, true);
   
   active_view = view;
 }

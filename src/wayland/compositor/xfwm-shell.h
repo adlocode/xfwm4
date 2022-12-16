@@ -47,6 +47,7 @@
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/xwayland.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
@@ -60,6 +61,8 @@ struct _Shell {
 	struct wl_global *global;
 	struct wl_list resources;
 	struct wl_list toplevels; // ShellWindow::link
+  
+  struct wlr_foreign_toplevel_manager_v1 *foreign_toplevel_manager;
 
 	struct wl_listener display_destroy;
 
