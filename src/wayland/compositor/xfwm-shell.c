@@ -888,6 +888,43 @@ wet_get_binary_path(const char *name)
 	return strdup(path);
 }
 
+static int
+sigchld_handler(int signal_number, void *data)
+{
+	struct weston_process *p;
+	//struct wet_compositor *wet = data;
+	int status;
+	pid_t pid;
+
+	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+		/*if (wet->autolaunch_pid != -1 && wet->autolaunch_pid == pid) {
+			if (wet->autolaunch_watch)
+				wl_display_terminate(wet->compositor->wl_display);
+			wet->autolaunch_pid = -1;
+			continue;
+		}*/
+
+		wl_list_for_each(p, &child_process_list, link) {
+			if (p->pid == pid)
+				break;
+		}
+
+		if (&p->link == &child_process_list) {
+			wlr_log(WLR_ERROR, "unknown child process exited\n");
+			continue;
+		}
+
+		wl_list_remove(&p->link);
+		wl_list_init(&p->link);
+		p->cleanup(p, status);
+	}
+
+	if (pid < 0 && errno != ECHILD)
+		wlr_log(WLR_ERROR, "waitpid error %s\n", strerror(errno));
+
+	return 1;
+}
+
 static void
 child_client_exec(int sockfd, const char *path)
 {
@@ -917,8 +954,11 @@ child_client_exec(int sockfd, const char *path)
 	setenv("WAYLAND_SOCKET", s, 1);
 
 	if (execl(path, path, NULL) < 0)
+    {
 		wlr_log(WLR_ERROR, "compositor: executing '%s' failed: %m\n",
 			path);
+    _exit(127);
+    }
 }
 
 static void
@@ -941,6 +981,12 @@ process_handle_sigchld(struct weston_process *process, int status)
 	} else {
 		wlr_log (WLR_INFO, "%s disappeared\n", pinfo->path);
 	}
+  
+  if (WEXITSTATUS(status) == 127)
+    {
+      wlr_log (WLR_ERROR, "Could not find shell helper client. Ensure that it is installed.\n");
+      exit(0);
+    }
 
 	free(pinfo->path);
 	free(pinfo);
@@ -1114,7 +1160,9 @@ static void handle_display_destroy(struct wl_listener *listener, void *data) {
 Shell *xfwm_shell_create(struct hopalong_server *server,
 		                                 struct wl_display *display)
 {
-	Shell *manager = calloc(1,
+	struct wl_event_source *signals[3];
+  
+  Shell *manager = calloc(1,
 			sizeof(Shell));
 	if (!manager) {
 		return NULL;
@@ -1137,6 +1185,9 @@ Shell *xfwm_shell_create(struct hopalong_server *server,
 	} 
                                   
   wlr_log (WLR_INFO, "\ncreate shell\n");
+    
+	signals[2] = wl_event_loop_add_signal(manager->event_loop, SIGCHLD, sigchld_handler,
+					      &server);
   
 	wl_event_loop_add_idle(manager->event_loop, launch_desktop_shell_process, manager);
 
