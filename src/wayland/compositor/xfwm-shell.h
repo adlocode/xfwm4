@@ -97,7 +97,7 @@ typedef struct _Shell Shell;
 };*/
 
 struct _ShellWindow {
-	Shell *manager;
+	Shell *shell;
 	struct wl_list resources;
 	struct wl_list link;
 	struct wl_event_source *idle_source;
