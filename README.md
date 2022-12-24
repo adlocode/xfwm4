@@ -30,13 +30,6 @@ The Wayland compositor must be installed in order to be used.
 
 From source: 
 
-    % cd xfwm4
-    % ./autogen.sh
-    % make
-    % make install
-    
-Compiling wlroots compositor:
-    
     % meson build
     % ninja -C build
     % ninja -C build install
