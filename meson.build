@@ -1,6 +1,7 @@
 project('xfwm4', 'c',
   version: '4.16.1',
-  meson_version: '>=0.50')
+  meson_version: '>=0.50',
+  default_options: 'c_std=c11',)
   
 xfwm4_version = meson.project_version()
 
@@ -64,7 +65,7 @@ cairo          = dependency('cairo')
 pango          = dependency('pango')
 pangocairo     = dependency('pangocairo')
 glesv2	       = dependency('glesv2')
-wlroots        = dependency('wlroots', version: '>=0.15.0')
+wlroots        = dependency('wlroots', version: '>=0.16.0')
 xkbcommon      = dependency('xkbcommon')
 glib           = dependency('glib-2.0')
 x11            = dependency('x11')
@@ -79,6 +80,7 @@ xrandr         = dependency('xrandr')
 libinput       = dependency('libinput', version: '>=1.10.0')
 egl            = dependency('egl', version: '>=1.0.0')
 evdev          = dependency('libevdev', version: '>=1.5.8')
+libxml2        = dependency('libxml-2.0')
 gtk            = dependency('gtk+-3.0', version: '>=' + gtk_minimum_version)
 libxfce4util   = dependency('libxfce4util-1.0',
                             version: '>=' + xfce_minimum_version)
@@ -129,6 +131,16 @@ add_global_arguments('-DDATADIR=' + '"' + datadir + '"', language: 'c')
 add_global_arguments('-DPACKAGE_DATADIR=' + '"' + pkgdatadir + '"', language: 'c')
 add_global_arguments('-DHELPERDIR=' + '"' + helper_path_prefix + '"', language: 'c')
 add_global_arguments('-DBINDIR=' + '"' + bindir + '"', language: 'c')
+
+add_project_arguments(
+  '-Wno-unused-parameter',
+  '-Wno-unused-variable',
+  '-D_DEFAULT_SOURCE',
+  '-D_POSIX_C_SOURCE=200112L',
+  '-DWLR_USE_UNSTABLE',
+  '-DPACKAGE_NAME="' + meson.project_name() + '"',
+  '-DPACKAGE_VERSION="' + meson.project_version() + '"',
+  language: 'c')
 
 configure_file(output: 'config.h',
   configuration: conf_data
