@@ -29,9 +29,9 @@ See [NEWS](https://gitlab.xfce.org/xfce/xfwm4/-/blob/master/NEWS) for details on
 From source: 
 
     % cd xfwm4
-    % ./autogen.sh
-    % make
-    % make install
+    % meson build
+    % ninja -C build
+    % ninja -C build install
 
 From release tarball:
 
