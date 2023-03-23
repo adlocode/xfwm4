@@ -61,6 +61,8 @@
 
 static DisplayInfo *default_display;
 
+static gboolean is_wayland_compositor = FALSE;
+
 static gboolean
 myDisplayInitAtoms (DisplayInfo *display_info)
 {
@@ -1039,4 +1041,16 @@ GdkKeymap *
 myDisplayGetKeymap (DisplayInfo *display_info)
 {
     return gdk_keymap_get_for_display (display_info->gdisplay);
+}
+
+gboolean
+xfwmIsWaylandCompositor (void)
+{
+  return is_wayland_compositor;
+}
+
+void
+xfwmSetIsWaylandCompositor (gboolean value)
+{
+  is_wayland_compositor = value;
 }

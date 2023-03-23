@@ -425,4 +425,6 @@ gint                     myDisplayErrorTrapPop                  (DisplayInfo *);
 void                     myDisplayErrorTrapPopIgnored           (DisplayInfo *);
 void                     myDisplayBeep                          (DisplayInfo *);
 GdkKeymap               *myDisplayGetKeymap                     (DisplayInfo *);
+gboolean                 xfwmIsWaylandCompositor                (void);
+void                     xfwmSetIsWaylandCompositor             (gboolean value);
 #endif /* INC_DISPLAY_H */

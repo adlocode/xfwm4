@@ -518,7 +518,7 @@ initialize (gboolean replace_wm)
 {
     DisplayInfo *display_info;
     gint i, nscreens, default_screen;
-
+  
     DBG ("xfwm4 starting, using GTK+-%d.%d.%d", gtk_major_version,
          gtk_minor_version, gtk_micro_version);
 
@@ -646,6 +646,7 @@ main (int argc, char **argv)
 {
     gboolean version = FALSE;
     gboolean replace_wm = FALSE;
+    gboolean opt_wayland = FALSE;
     int status;
     GOptionContext *context;
     GError *error = NULL;
@@ -669,6 +670,10 @@ main (int argc, char **argv)
 #endif /* HAVE_COMPOSITOR */
         { "replace", 'r', 0, G_OPTION_ARG_NONE,
           &replace_wm, N_("Replace the existing window manager"), NULL },
+        { "wayland", 0, 0, G_OPTION_ARG_NONE,
+          &opt_wayland,
+          N_("Run as a Wayland compositor"),
+          NULL,},
         { "version", 'V', 0, G_OPTION_ARG_NONE,
           &version, N_("Print version information and exit"), NULL },
 #ifdef DEBUG
@@ -706,7 +711,7 @@ main (int argc, char **argv)
      * any other display server (like when running nested within a
      * Wayland compositor).
      */
-    gdk_set_allowed_backends ("x11");
+    //gdk_set_allowed_backends ("x11");
 
 #ifndef HAVE_XI2
     /* Disable XI2 in GDK */
@@ -727,6 +732,8 @@ main (int argc, char **argv)
           return EXIT_FAILURE;
     }
     g_option_context_free (context);
+  
+    xfwmSetIsWaylandCompositor (opt_wayland);
 
 #ifdef DEBUG
     setupLog (debug);
