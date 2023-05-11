@@ -170,7 +170,9 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     int i, j;
 
     g_return_val_if_fail (display_info, NULL);
+    
     g_return_val_if_fail (GDK_IS_SCREEN (gscr), NULL);
+    
     TRACE ("entering");
 
     screen_info = g_new0 (ScreenInfo, 1);
@@ -180,7 +182,7 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->gscr = gscr;
     desktop_visible = 0;
     layout = NULL;
-
+  
     /* Create a GTK window so that we are just like any other GTK application */
     screen_info->gtk_win = gtk_window_new (GTK_WINDOW_POPUP);
     gtk_window_set_screen (GTK_WINDOW (screen_info->gtk_win), gscr);
@@ -208,6 +210,8 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->shape_win = (Window) None;
     myScreenComputeSize (screen_info);
 
+    if (!xfwmIsWaylandCompositor ())
+    {
     screen_info->xfwm4_win = gdk_x11_window_get_xid (gtk_widget_get_window (screen_info->gtk_win));
     if (!myScreenSetWMAtom (screen_info, replace_wm))
     {
@@ -224,6 +228,7 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
         return NULL;
     }
     gdk_window_set_user_data (event_win, screen_info->gtk_win);
+    }
 
     screen_info->current_ws = 0;
     screen_info->previous_ws = 0;
@@ -250,6 +255,8 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->key_grabs = 0;
     screen_info->pointer_grabs = 0;
 
+    if (!xfwmIsWaylandCompositor ())
+    {
     getHint (display_info, screen_info->xroot, NET_SHOWING_DESKTOP, &desktop_visible);
     screen_info->show_desktop = (desktop_visible != 0);
 
@@ -327,6 +334,7 @@ myScreenInit (DisplayInfo *display_info, GdkScreen *gscr, unsigned long event_ma
     screen_info->monitors_index = NULL;
     myScreenInvalidateMonitorCache (screen_info);
     myScreenRebuildMonitorIndex (screen_info);
+    }
 
     return (screen_info);
 }

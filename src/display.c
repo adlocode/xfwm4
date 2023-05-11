@@ -331,7 +331,7 @@ myDisplayInit (GdkDisplay *gdisplay)
 
     myDisplayCreateCursor (display);
 
-    myDisplayCreateTimestampWin (display);
+    myDisplayCreateTimestampWin (display);    
 
     display->xfilter = NULL;
     display->screens = NULL;
@@ -342,6 +342,8 @@ myDisplayInit (GdkDisplay *gdisplay)
     display->nb_screens = 0;
     display->current_time = CurrentTime;
 
+    if (!xfwmIsWaylandCompositor ())
+    {
     hostnametmp = g_new0 (gchar, (size_t) MAX_HOSTNAME_LENGTH + 1);
     if (gethostname ((char *) hostnametmp, MAX_HOSTNAME_LENGTH))
     {
@@ -354,6 +356,7 @@ myDisplayInit (GdkDisplay *gdisplay)
     g_free (hostnametmp);
 
     compositorInitDisplay (display);
+    }
 
     return display;
 }

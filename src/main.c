@@ -16,8 +16,8 @@
         MA 02110-1301, USA.
 
 
-        oroborus - (c) 2001 Ken Lynch
-        xfwm4    - (c) 2002-2011 Olivier Fourdan
+        oroborus      - (c) 2001 Ken Lynch
+        xfwm4         - (c) 2002-2011 Olivier Fourdan
 
  */
 
@@ -49,6 +49,7 @@
 
 #include "display.h"
 #include "screen.h"
+#include "wayland/server.h"
 #include "events.h"
 #include "event_filter.h"
 #include "frame.h"
@@ -63,6 +64,8 @@
 #include "startup_notification.h"
 #include "compositor.h"
 #include "spinning_cursor.h"
+
+static GMainLoop *xfwm_main_loop = NULL;
 
 #define BASE_EVENT_MASK \
     SubstructureNotifyMask|\
@@ -517,7 +520,7 @@ static int
 initialize (gboolean replace_wm)
 {
     DisplayInfo *display_info;
-    gint i, nscreens, default_screen;
+    gint i, nscreens, default_screen;  
   
     DBG ("xfwm4 starting, using GTK+-%d.%d.%d", gtk_major_version,
          gtk_minor_version, gtk_micro_version);
@@ -533,13 +536,14 @@ initialize (gboolean replace_wm)
 #else
     display_info->enable_compositor = FALSE;
 #endif /* HAVE_COMPOSITOR */
-
+  
     initModifiers (display_info->dpy);
 
     setupHandler (TRUE);
 
-    nscreens = ScreenCount (display_info->dpy);
-    default_screen = DefaultScreen (display_info->dpy);
+      nscreens = ScreenCount (display_info->dpy);
+      default_screen = DefaultScreen (display_info->dpy);    
+  
     for(i = 0; i < nscreens; i++)
     {
         ScreenInfo *screen_info;
@@ -549,7 +553,7 @@ initialize (gboolean replace_wm)
 
         if (i == default_screen)
         {
-            gscr = gdk_display_get_default_screen (display_info->gdisplay);
+            gscr = gdk_display_get_default_screen (display_info->gdisplay);            
         }
         else
         {
@@ -577,14 +581,19 @@ initialize (gboolean replace_wm)
         }
         screen_info = myScreenInit (display_info, gscr, MAIN_EVENT_MASK, replace_wm);
 
+        wlr_log (WLR_INFO, "create screen\n");
+        
         if (!screen_info)
         {
             continue;
         }
 
+        if (!xfwmIsWaylandCompositor ())
+        {
         if (!initSettings (screen_info))
         {
             return -2;
+        }
         }
 #ifdef HAVE_COMPOSITOR
         if (display_info->enable_compositor)
@@ -593,7 +602,13 @@ initialize (gboolean replace_wm)
         }
 #endif /* HAVE_COMPOSITOR */
         sn_init_display (screen_info);
+        
         myDisplayAddScreen (display_info, screen_info);
+      
+      if (xfwmIsWaylandCompositor ())
+        {
+          return 0;
+        }
         screen_info->current_ws = getNetCurrentDesktop (display_info, screen_info->xroot);
         setUTF8StringHint (display_info, screen_info->xfwm4_win, NET_WM_NAME, "Xfwm4");
         setNetSupportedHint (display_info, screen_info->xroot, screen_info->xfwm4_win);
@@ -711,7 +726,7 @@ main (int argc, char **argv)
      * any other display server (like when running nested within a
      * Wayland compositor).
      */
-    //gdk_set_allowed_backends ("x11");
+    gdk_set_allowed_backends ("x11");
 
 #ifndef HAVE_XI2
     /* Disable XI2 in GDK */
@@ -738,7 +753,15 @@ main (int argc, char **argv)
 #ifdef DEBUG
     setupLog (debug);
 #endif /* DEBUG */
-    DBG ("xfwm4 starting");
+    DBG ("xfwm4 starting");  
+
+    if (xfwmIsWaylandCompositor ())
+    {
+      wlr_log_init (WLR_INFO, NULL);
+      
+      xfwmWaylandInit ();
+      
+    }    
 
     gtk_init (&argc, &argv);
 
@@ -750,6 +773,15 @@ main (int argc, char **argv)
     init_pango_cache ();
 
     status = initialize (replace_wm);
+  
+    xfwmWaylandCompositor *compositor = xfwmWaylandGetDefault ();
+  
+    if (xfwmIsWaylandCompositor ())
+    {
+      wl_event_loop_dispatch (wl_display_get_event_loop (compositor->wl_display), -1);
+      wl_event_loop_dispatch (wl_display_get_event_loop (compositor->wl_display), -1);
+      wl_event_loop_dispatch (wl_display_get_event_loop (compositor->wl_display), -1);
+    }
     /*
        status  < 0   =>   Error, cancel execution
        status == 0   =>   Run w/out session manager
@@ -775,7 +807,10 @@ main (int argc, char **argv)
             exit (1);
             break;
     }
+    if (!xfwmIsWaylandCompositor ())
+    {
     cleanUp ();
+    }
     DBG ("xfwm4 terminated");
     return 0;
 }

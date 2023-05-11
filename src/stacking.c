@@ -394,6 +394,11 @@ clientRaise (Client * c, Window wsibling)
 
     TRACE ("client \"%s\" (0x%lx) above (0x%lx)", c->name, c->window, wsibling);
 
+    if (xfwmIsWaylandCompositor () && !c->scene_tree)
+    {
+        return;
+    }
+
     if (!FLAG_TEST (c->xfwm_flags, XFWM_FLAG_MANAGED))
     {
         return;
@@ -452,8 +457,20 @@ clientRaise (Client * c, Window wsibling)
     /* Now, screen_info->windows_stack contains the correct window stack
        We still need to tell the X Server to reflect the changes
      */
+    if (xfwmIsWaylandCompositor ())
+    {
+        xfwmWaylandCompositor *compositor = xfwmWaylandGetDefault ();
+        /* Move the view to the front */
+	if (!compositor->seat->focused_layer)
+    {
+		wlr_scene_node_raise_to_top(&c->scene_tree->node);
+	}
+    }
+    else
+    {
     clientApplyStackList (screen_info);
     clientSetNetClientList (screen_info, display_info->atoms[NET_CLIENT_LIST_STACKING], screen_info->windows_stack);
+    }
     screen_info->last_raise = c;
 }
 
