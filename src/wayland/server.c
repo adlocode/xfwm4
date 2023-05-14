@@ -89,7 +89,7 @@ xfwmWaylandInit (void)
     compositor->wl_display = wl_display_create();
     if (compositor->wl_display == NULL) {
         wlr_log(WLR_ERROR, "%s", _("Failed to connect to a Wayland display"));
-        return false;
+        return;
     }
 
     wayland_event_source = wayland_event_source_new (compositor->wl_display);
@@ -108,7 +108,7 @@ xfwmWaylandInit (void)
 #endif
     if (compositor->backend == NULL) {
         wlr_log(WLR_ERROR, "%s", _("Failed to create backend"));
-        return false;
+        return;
     }
 
     /* Autocreates a renderer, either Pixman, GLES2 or Vulkan for us. The user
@@ -118,7 +118,7 @@ xfwmWaylandInit (void)
     compositor->renderer = wlr_renderer_autocreate(compositor->backend);
     if (compositor->renderer == NULL) {
         wlr_log(WLR_ERROR, "%s", _("Failed to create renderer"));
-        return false;
+        return;
     }
 
     wlr_renderer_init_wl_display(compositor->renderer, compositor->wl_display);
@@ -130,7 +130,7 @@ xfwmWaylandInit (void)
         compositor->allocator = wlr_allocator_autocreate(compositor->backend, compositor->renderer);
     if (compositor->allocator == NULL) {
         wlr_log(WLR_ERROR, "%s", _("Failed to create allocator"));
-        return false;
+        return;
     }
 
     compositor->compositor = wlr_compositor_create(compositor->wl_display,
@@ -160,14 +160,14 @@ xfwmWaylandInit (void)
     const char *socket = wl_display_add_socket_auto(compositor->wl_display);
     if (!socket) {
         wlr_backend_destroy(compositor->backend);
-        return false;
+        return;
     }
 
     if (!wlr_backend_start(compositor->backend)) {
         wlr_log(WLR_ERROR, "%s", _("Failed to start backend"));
         wlr_backend_destroy(compositor->backend);
         wl_display_destroy(compositor->wl_display);
-        return false;
+        return;
     }
 
     wlr_log(WLR_INFO, "%s: WAYLAND_DISPLAY=%s", _("Running Wayland compositor on Wayland display"), socket);
@@ -192,8 +192,6 @@ xfwmWaylandInit (void)
     init_xdg_shell(compositor);
     
     init_xwayland (compositor);	
-
-    return true;
 }
 
 xfwmWaylandCompositor *
