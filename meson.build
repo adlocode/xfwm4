@@ -1,6 +1,7 @@
 project('xfwm4', 'c',
   version: '4.18.0',
-  meson_version: '>=0.50',)
+  meson_version: '>=0.50',
+  default_options: 'c_std=c11',)
   
 xfwm4_version = meson.project_version()
 
@@ -48,9 +49,25 @@ localedir = join_paths(datadir, 'locale')
 top_srcdir = meson.current_source_dir()
 builddir = meson.current_build_dir()
 
+#localedir = '"' + get_option('localedir') + '"'
+
+
+add_project_arguments('-DWLR_USE_UNSTABLE', language: 'c')
 
 cc = meson.get_compiler('c')
 
+wayland_server = dependency('wayland-server')
+wayland_client = dependency('wayland-client')
+wayland_cursor = dependency('wayland-cursor')
+wayland_egl    = dependency('wayland-egl')
+wayland_protos = dependency('wayland-protocols', version: '>=1.14')
+pixman         = dependency('pixman-1')
+cairo          = dependency('cairo')
+pango          = dependency('pango')
+pangocairo     = dependency('pangocairo')
+glesv2	       = dependency('glesv2')
+wlroots        = dependency('wlroots', version: '>=0.16.0')
+xkbcommon      = dependency('xkbcommon')
 glib           = dependency('glib-2.0', version: '>=' + glib_minimum_version)
 x11            = dependency('x11')
 compositor     = [
@@ -62,6 +79,9 @@ xrender        = dependency('xrender')
 xext           = dependency('xext')
 xrandr         = dependency('xrandr')
 libinput       = dependency('libinput', version: '>=1.10.0')
+egl            = dependency('egl', version: '>=1.0.0')
+evdev          = dependency('libevdev', version: '>=1.5.8')
+libxml2        = dependency('libxml-2.0')
 gtk            = dependency('gtk+-3.0', version: '>=' + gtk_minimum_version)
 libxfce4util   = dependency('libxfce4util-1.0',
                             version: '>=' + xfce_minimum_version)
@@ -76,6 +96,23 @@ libwnck        = dependency('libwnck-3.0',
 xinerama       = dependency('xinerama')
 
 m_dep          = cc.find_library('m')
+
+# glibc lacks strl*. if we can't detect them, assume we need libbsd
+lacking_libc = false
+if cc.has_function('strlcpy') == false or cc.has_function('strlcat') == false
+  lacking_libc = true
+  bsd_overlay = dependency('libbsd-overlay')
+endif
+
+if get_option('xwayland')
+	xcb    = dependency('xcb', required: true)
+
+	if xcb.found()
+		add_project_arguments('-DUSE_XWAYLAND', language: 'c')
+	endif
+endif
+
+
 
 conf_data = configuration_data()
 conf_data.set('PACKAGE', '"' + pkgname + '"')
@@ -101,6 +138,7 @@ add_project_arguments(
   '-Wno-unused-variable',
   '-D_DEFAULT_SOURCE',
   '-D_POSIX_C_SOURCE=200112L',
+  '-DWLR_USE_UNSTABLE',
   '-DPACKAGE_NAME="' + meson.project_name() + '"',
   '-DPACKAGE_VERSION="' + meson.project_version() + '"',
   language: 'c')
@@ -111,5 +149,6 @@ configure_file(output: 'config.h',
 
 incdir = include_directories('.')
 
+subdir('protocol')
 subdir('common')
 subdir('src')

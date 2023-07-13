@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="window_switcher_v1">
+    <copyright>
+	Copyright © 2017 Quentin "Sardem FF7" Glidic
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+    </copyright>
+
+    <interface name="zww_window_switcher_v1" version="1">
+	<description summary="singleton for window switchers">
+	    The object is a singleton global.
+
+	    This interface can only be bound once at the same time.
+	    Any binding of this interface while already bound results
+	    in a protocol error (bound).
+	    Compositors are expected to restrict this interface to trusted clients.
+
+	    This interface is intended for window switchers of any kind.
+	</description>
+
+	<request name="destroy" type="destructor" />
+
+	<enum name="error">
+	    <description summary="ww_window_switcher error values">
+		These errors can be emitted in response to
+		ww_window_switcher requests.
+	    </description>
+	    <entry name="bound" value="0" summary="ww_window_switcher is already bound"/>
+	    <entry name="role" value="1" summary="given wl_surface has another role"/>
+	    <entry name="unique" value="2" summary="another wl_surface has this role already"/>
+	    <entry name="serial" value="3" summary="given serial is no longer valid"/>
+	</enum>
+
+	<event name="window">
+	    <description summary="the surface is dismissed and must be destroyed">
+		This event will be sent whenever the implicit grab is broken.
+		When receiving this event, the client must destroy the wl_surface.
+	    </description>
+	    <arg name="window" type="new_id" interface="zww_window_switcher_window_v1" />
+	</event>
+    </interface>
+
+    <interface name="zww_window_switcher_window_v1" version="1">
+	<description summary="singleton for window switchers">
+	    The object is a singleton global.
+
+	    This interface can only be bound once at the same time.
+	    Any binding of this interface while already bound results
+	    in a protocol error (bound).
+
+	    Compositors are expected to restrict this interface to trusted clients.
+	</description>
+
+	<request name="destroy" type="destructor" />
+
+	<enum name="error">
+	    <description summary="ww_window_switcher_window error values">
+		These errors can be emitted in response to
+		ww_window_switcher_window requests.
+	    </description>
+	    <entry name="invalid_rectangle" value="0" summary="invalid rectangle values" />
+	</enum>
+
+	<request name="switch_to">
+	    <description summary="switch to this window">
+		Tell the compositor to switch to this window.
+	    </description>
+	    <arg name="seat" type="object" interface="wl_seat" />
+	    <arg name="serial" type="uint" />
+	</request>
+
+	<request name="close">
+	    <description summary="close this window">
+		Tell the compositor to close this window.
+	    </description>
+	    <arg name="seat" type="object" interface="wl_seat" />
+	    <arg name="serial" type="uint" />
+	</request>
+
+	<request name="show">
+	    <description summary="show a window thumbnail at given position">
+		This tells the compositor to draw a thumbnail of the window
+		in the given rectangle.
+
+		All of x, y, width and height must be positive. And width and
+		height must be strictly positive. Otherwise, a protocol error
+		(invalid_rectangle) is raised.
+	    </description>
+	    <arg name="surface" type="object" interface="wl_surface" />
+	    <arg name="x" type="int" summary="surface-local x coordinate" />
+	    <arg name="y" type="int" summary="surface-local y coordinate" />
+	    <arg name="width" type="int" />
+	    <arg name="height" type="int" />
+	</request>
+
+	<event name="title">
+	    <description summary="the window title">
+	    </description>
+	    <arg name="title" type="string" summary="the window title" />
+	</event>
+
+	<event name="app_id">
+	    <description summary="the window app_id">
+	    </description>
+	    <arg name="app_id" type="string" summary="the window app_id" />
+	</event>
+
+	<event name="workspace">
+	    <description summary="the workspace name the window is on">
+	    </description>
+	    <arg name="workspace" type="string" summary="the workspace name the window is on" />
+	</event>
+
+	<event name="done">
+	    <description summary="all window data has been transmitted">
+		This event will be sent whenever all data for this window has
+		been transmitted.
+
+		If some data event was not received, it means the data was
+		unavailable.
+	    </description>
+	</event>
+    </interface>
+</protocol>

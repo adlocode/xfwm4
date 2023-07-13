@@ -1623,7 +1623,7 @@ clientRestoreSizePos (Client *c)
 }
 
 Client *
-clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
+clientFrameX11 (DisplayInfo *display_info, Window w, gboolean recapture)
 {
     ScreenInfo *screen_info;
     XWindowAttributes attr;
@@ -1667,6 +1667,40 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
         goto out;
     }
 
+    c = _clientFrame (display_info,
+                      screen_info,
+                      XFWM_CLIENT_TYPE_X11,
+                      NULL,                      
+                      w,
+                      &attr,
+                      FALSE);
+
+    out:
+    /* Window is reparented now, so we can safely release the grab
+     * on the server
+     */
+    myDisplayErrorTrapPopIgnored (display_info);
+    myDisplayUngrabServer (display_info);
+
+    return c;
+}
+
+Client *
+_clientFrame (DisplayInfo *display_info,
+              ScreenInfo *screen_info,
+              xfwmClientType client_type,
+              struct wlr_xdg_surface *xdg_surface,              
+              Window w,
+              XWindowAttributes *attr,
+              gboolean recapture)
+{
+    XSetWindowAttributes attributes;
+    Client *c = NULL;
+    gboolean shaped;
+    gchar *wm_name;
+    unsigned long valuemask;
+    int i;
+
     c = g_new0 (Client, 1);
     if (!c)
     {
@@ -1674,7 +1708,12 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
         goto out;
     }
 
+    c->client_type = client_type;
     c->window = w;
+    if (client_type == XFWM_CLIENT_TYPE_WAYLAND)
+    {
+       c->xdg_toplevel = xdg_surface->toplevel;
+    }
     c->screen_info = screen_info;
     c->serial = screen_info->client_serial++;
 
@@ -1682,10 +1721,13 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->dialog_pid = 0;
     c->dialog_fd = -1;
 
+    if (client_type == XFWM_CLIENT_TYPE_X11)
+    {
     getWindowName (display_info, c->window, &wm_name);
     getWindowHostname (display_info, c->window, &c->hostname);
     c->name = clientCreateTitleName (c, wm_name, c->hostname);
     g_free (wm_name);
+    }
 
     getTransientFor (display_info, screen_info->xroot, c->window, &c->transient_for);
     XChangeSaveSet(display_info->dpy, c->window, SetModeInsert);
@@ -1695,10 +1737,10 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->flags = 0L;
     c->wm_flags = 0L;
     c->xfwm_flags = XFWM_FLAG_INITIAL_VALUES;
-    c->x = attr.x;
-    c->y = attr.y;
-    c->width = attr.width;
-    c->height = attr.height;
+    c->x = attr->x;
+    c->y = attr->y;
+    c->width = attr->width;
+    c->height = attr->height;
 
     c->applied_geometry.x = c->x;
     c->applied_geometry.y = c->y;
@@ -1711,14 +1753,16 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
 
     clientGetWMNormalHints (c, FALSE);
     clientGetMWMHints (c);
+    if (client_type == XFWM_CLIENT_TYPE_X11)
+    {
     c->size->x = c->x;
     c->size->y = c->y;
     c->size->width = c->width;
     c->size->height = c->height;
     c->frame_cache_width = -1;
     c->frame_cache_height = -1;
-    c->border_width = attr.border_width;
-    c->cmap = attr.colormap;
+    c->border_width = attr->border_width;
+    c->cmap = attr->colormap;
 
     shaped = clientCheckShape(c);
     if (shaped)
@@ -1735,6 +1779,7 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     {
         FLAG_SET (c->xfwm_flags, XFWM_FLAG_IS_RESIZABLE);
     }
+    
 
     for (i = 0; i < BUTTON_COUNT; i++)
     {
@@ -1776,6 +1821,8 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     /* Ping timeout  */
     c->ping_time = 0;
 
+    } /* Wayland guard */
+
     c->class.res_name = NULL;
     c->class.res_class = NULL;
     XGetClassHint (display_info->dpy, w, &c->class);
@@ -1792,14 +1839,14 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
 
     TRACE ("\"%s\" (0x%lx) initial map_state = %s",
                 c->name, c->window,
-                (attr.map_state == IsUnmapped) ?
+                (attr->map_state == IsUnmapped) ?
                 "IsUnmapped" :
-                (attr.map_state == IsViewable) ?
+                (attr->map_state == IsViewable) ?
                 "IsViewable" :
-                (attr.map_state == IsUnviewable) ?
+                (attr->map_state == IsUnviewable) ?
                 "IsUnviewable" :
                 "(unknown)");
-    if (attr.map_state != IsUnmapped)
+    if (attr->map_state != IsUnmapped)
     {
         /* Reparent will send us unmap/map events */
         FLAG_SET (c->xfwm_flags, XFWM_FLAG_MAP_PENDING);
@@ -1808,13 +1855,22 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->type = UNSET;
     c->type_atom = None;
 
+    
+
     FLAG_SET (c->flags, START_ICONIC (c) ? CLIENT_FLAG_ICONIFIED : 0);
+
+    if (client_type == XFWM_CLIENT_TYPE_X11)
+    {
     FLAG_SET (c->wm_flags, HINTS_ACCEPT_INPUT (c->wmhints) ? WM_FLAG_INPUT : 0);
+    }
+    
 
     clientGetWMProtocols (c);
     c->win_layer = WIN_LAYER_NORMAL;
     c->pre_fullscreen_layer = c->win_layer;
 
+    if (client_type == XFWM_CLIENT_TYPE_X11)
+    {
     /* net_wm_user_time standard */
     c->user_time = 0;
     c->user_time_win = getNetWMUserTimeWindow(display_info, c->window);
@@ -1849,11 +1905,12 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     if (!FLAG_TEST (c->xfwm_flags, XFWM_FLAG_SESSION_MANAGED))
     {
         clientCoordGravitate (c, c->gravity, APPLY, &c->x, &c->y);
-        if (attr.map_state == IsUnmapped)
+        if (attr->map_state == IsUnmapped)
         {
             clientInitPosition (c);
         }
     }
+    } /* Wayland guard */
 
     /*
        Initialize "old" fields once the position is ensured, to avoid
@@ -1870,6 +1927,8 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->pre_fullscreen_geometry.width = c->width;
     c->pre_fullscreen_geometry.height = c->height;
 
+    if (client_type == XFWM_CLIENT_TYPE_X11)
+    {
     /*
        We must call clientApplyInitialState() after having placed the
        window so that the inital position values are correctly set if the
@@ -1883,12 +1942,12 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     attributes.bit_gravity = StaticGravity;
 
 #ifdef HAVE_RENDER
-    if ((attr.depth == 32) && (display_info->have_render))
+    if ((attr->depth == 32) && (display_info->have_render))
     {
-        c->visual = attr.visual;
-        c->depth  = attr.depth;
+        c->visual = attr->visual;
+        c->depth  = attr->depth;
 
-        attributes.colormap = attr.colormap;
+        attributes.colormap = attr->colormap;
         attributes.background_pixmap = None;
         attributes.border_pixel = 0;
         attributes.background_pixel = 0;
@@ -1907,9 +1966,12 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     c->depth  = screen_info->depth;
 #endif /* HAVE_RENDER */
 
+if (!xfwmIsWaylandCompositor ())
+{
     c->frame =
         XCreateWindow (display_info->dpy, screen_info->xroot, 0, 0, 1, 1, 0,
         c->depth, InputOutput, c->visual, valuemask, &attributes);
+}
 #ifdef HAVE_XI2
     xfwm_device_configure_xi2_event_mask (display_info->devices, display_info->dpy,
                                           c->frame, attributes.event_mask);
@@ -1942,10 +2004,12 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     {
         XShapeSelectInput (display_info->dpy, c->window, ShapeNotifyMask);
     }
+    } /* Wayland guard */
 
     clientAddToList (c);
     clientGrabButtons(c);
-
+if (!xfwmIsWaylandCompositor ())
+{
     /* Initialize per client menu button pixmap */
 
     for (i = 0; i < STATE_TOGGLED; i++)
@@ -1996,6 +2060,7 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
 
     /* Notify the compositor about this new window */
     compositorAddWindow (display_info, c->frame, c);
+} /* Wayland guard */
 
     if (!FLAG_TEST (c->flags, CLIENT_FLAG_ICONIFIED))
     {
@@ -2026,11 +2091,14 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
         setWMState (display_info, c->window, IconicState);
         clientSetNetActions (c);
     }
+    if (client_type == XFWM_CLIENT_TYPE_X11)
+    {
     clientUpdateOpacity (c);
     clientGrabMouseButton (c);
     setNetFrameExtents (display_info, c->window, frameTop (c), frameLeft (c),
                                                  frameRight (c), frameBottom (c));
     clientSetNetState (c);
+    }
 
 #ifdef HAVE_XSYNC
     c->xsync_counter = None;
@@ -2051,12 +2119,7 @@ clientFrame (DisplayInfo *display_info, Window w, gboolean recapture)
     DBG ("client_count=%d", screen_info->client_count);
 
 out:
-    /* Window is reparented now, so we can safely release the grab
-     * on the server
-     */
-    myDisplayErrorTrapPopIgnored (display_info);
-    myDisplayUngrabServer (display_info);
-
+ 
     return c;
 }
 
@@ -2178,7 +2241,7 @@ clientFrameAll (ScreenInfo *screen_info)
         XGetWindowAttributes (display_info->dpy, wins[i], &attr);
         if ((attr.map_state == IsViewable) && (attr.root == screen_info->xroot))
         {
-            Client *c = clientFrame (display_info, wins[i], TRUE);
+            Client *c = clientFrameX11 (display_info, wins[i], TRUE);
             if ((c) && ((screen_info->params->raise_on_click) || (screen_info->params->click_to_focus)))
             {
                 clientGrabMouseButton (c);

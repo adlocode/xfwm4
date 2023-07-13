@@ -33,7 +33,15 @@ xfwm4_sources = [
   'ui_style.c',
   'wireframe.c',
   'workspaces.c',
-  'xsync.c',  
+  'xsync.c',
+  'wayland/cursor.c',
+  'wayland/decoration.c',
+  'wayland/layer_shell.c',
+  'wayland/output.c',
+  'wayland/seat.c',
+  'wayland/server.c',
+  'wayland/xdg_shell.c',
+  'wayland/xwayland.c',
 ]
 
 xfwm4_dependencies = [ 
@@ -50,6 +58,13 @@ xfwm4_dependencies = [
   libxfconf,
   xinerama,
   m_dep,
+  xfwm_server_protos,
+  evdev,
+  libinput,
+  libxml2,
+  wayland_server,
+  wlroots,
+  xkbcommon,
 ]
 
 xfwm4_exe = executable('xfwm4',

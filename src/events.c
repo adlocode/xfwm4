@@ -1168,7 +1168,7 @@ handleMapRequest (DisplayInfo *display_info, XMapRequestEvent * ev)
     }
     else
     {
-        clientFrame (display_info, ev->window, FALSE);
+        clientFrameX11 (display_info, ev->window, FALSE);
     }
 
     status = EVENT_FILTER_REMOVE;

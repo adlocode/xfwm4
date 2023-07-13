@@ -270,12 +270,28 @@ typedef enum
 }
 tilePositionType;
 
+typedef enum
+{
+    XFWM_CLIENT_TYPE_WAYLAND,
+    XFWM_CLIENT_TYPE_X11
+}
+xfwmClientType;
+
 struct _Client
 {
     /* Reference to our screen structure */
     ScreenInfo *screen_info;
+  
+    xfwmWaylandCompositor *server;
+
+    xfwmClientType client_type;
 
     Window window;
+    
+    struct wlr_xdg_toplevel *xdg_toplevel;
+    struct wlr_xwayland_surface *xwayland_surface;
+    struct wlr_scene_tree *scene_tree;
+  
     Window frame;
     Window transient_for;
     Window user_time_win;
@@ -348,6 +364,20 @@ struct _Client
     guint32 opacity;
     guint32 opacity_applied;
     guint opacity_flags;
+  
+    struct wl_list link;	
+
+    struct wlr_xdg_toplevel_decoration_v1 *decoration;
+
+    struct wl_listener map;
+    struct wl_listener unmap;
+    struct wl_listener destroy;
+    struct wl_listener new_popup;
+    struct wl_listener request_fullscreen;
+    struct wl_listener request_maximize;
+    struct wl_listener request_minimize;
+    struct wl_listener request_move;
+    struct wl_listener request_resize;
 
 #ifdef HAVE_LIBSTARTUP_NOTIFICATION
     /* Startup notification */
@@ -399,9 +429,19 @@ void                     clientGetWMProtocols                   (Client *);
 void                     clientUpdateIcon                       (Client *);
 void                     clientSaveSizePos                      (Client *);
 gboolean                 clientRestoreSizePos                   (Client *);
-Client                  *clientFrame                            (DisplayInfo *,
+Client *                 _clientFrame                           (DisplayInfo *,
+                                                                 ScreenInfo *,
+                                                                 xfwmClientType,
+                                                                 struct wlr_xdg_surface *,                                                                 
                                                                  Window,
+                                                                 XWindowAttributes *,
                                                                  gboolean);
+Client *                clientFrameWayland                      (DisplayInfo *display_info,
+                                                                 struct wlr_xdg_surface *xdg_surface,                                                                 
+                                                                 gboolean recapture);
+Client *                clientFrameX11                          (DisplayInfo *display_info,
+                                                                 Window w,
+                                                                 gboolean recapture);
 void                     clientUnframe                          (Client *,
                                                                  gboolean);
 void                     clientFrameAll                         (ScreenInfo *);
