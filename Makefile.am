@@ -12,15 +12,23 @@ EXTRA_DIST =								\
 	xfce-revision.h.in \
 	$(NULL)
 
+EXTRA_DIST +=								\
+	protocol/xdg-shell.xml
+
 SUBDIRS = 								\
 	defaults 							\
 	helper-dialog 							\
 	icons 								\
 	common 								\
 	settings-dialogs						\
+	protocol							\
 	src 								\
 	themes								\
 	po
+	
+BUILT_SOURCES =								\
+	protocol/xdg-shell-protocol.h					\
+	protocol/wlr-layer-shell-unstable-v1-protocol.h
 
 distclean-local:
 	rm -rf *.cache po/.intltool-merge-cache.lock
@@ -68,3 +76,19 @@ compile_flags.txt: Makefile
 	done
 
 endif
+
+.SECONDEXPANSION:
+
+define protostability
+$(if $(findstring unstable,$1),unstable,stable)
+endef
+
+define protoname
+$(shell echo $1 | $(SED) 's/\([a-z\-]\+\)-[a-z]\+-v[0-9]\+/\1/')
+endef
+
+protocol/xdg-shell-protocol.h : $(top_srcdir)/protocol/xdg-shell.xml
+	$(AM_V_GEN) $(wayland_scanner) server-header $(top_srcdir)/protocol/xdg-shell.xml $(top_srcdir)/protocol/xdg-shell-protocol.h
+	
+protocol/wlr-layer-shell-unstable-v1-protocol.h : $(top_srcdir)/protocol/wlr-layer-shell-unstable-v1.xml
+	$(AM_V_GEN) $(wayland_scanner) server-header $(top_srcdir)/protocol/wlr-layer-shell-unstable-v1.xml $(top_srcdir)/protocol/wlr-layer-shell-unstable-v1-protocol.h

@@ -33,6 +33,22 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/shape.h>
 
+#include <wlr/backend.h>
+#include <wlr/render/allocator.h>
+#include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_gamma_control_v1.h>
+#include <wlr/types/wlr_idle_notify_v1.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_screencopy_v1.h>
+#include <wlr/types/wlr_subcompositor.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/xwayland.h>
+#include <wlr/util/log.h>
+
 #ifndef ShapeInput
 #define ShapeInput 2
 #endif
@@ -66,6 +82,8 @@
 #include <libxfce4ui/libxfce4ui.h>
 
 #include "event_filter.h"
+
+#include "wayland/server.h"
 
 /*
  * The following macro is taken straight from metacity,

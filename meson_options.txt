@@ -74,3 +74,6 @@ option(
   value: '',
   description: 'Path prefix under which helper executables will be installed (default: $libdir)',
 )
+
+option('xwayland', type: 'boolean', value: true,
+	description: 'Whether Xwayland support is enabled')

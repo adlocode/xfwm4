@@ -657,6 +657,12 @@ getTransientFor (DisplayInfo *display_info, Window root, Window w, Window * tran
 
     TRACE ("window 0x%lx", w);
 
+    if (xfwmIsWaylandCompositor ())
+    {
+        *transient_for = None;
+        return;
+    }
+    
     myDisplayErrorTrapPush (display_info);
     status = XGetTransientForHint (display_info->dpy, w, transient_for);
     result = myDisplayErrorTrapPop (display_info);

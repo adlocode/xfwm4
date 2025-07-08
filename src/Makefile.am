@@ -1,6 +1,7 @@
 bin_PROGRAMS = xfwm4
 
 xfwm4_SOURCES =								\
+	$(top_srcdir)/protocol/xdg-shell-protocol.h			\
 	client.c							\
 	client.h							\
 	compositor.c							\
@@ -70,7 +71,23 @@ xfwm4_SOURCES =								\
 	workspaces.h							\
 	xsync.c								\
 	xsync.h								\
-	xpm-color-table.h
+	xpm-color-table.h						\
+	wayland/cursor.c						\
+	wayland/cursor.h						\
+	wayland/decoration.c						\
+	wayland/decoration.h						\
+	wayland/layer_shell.c						\
+	wayland/layer_shell.h						\
+	wayland/output.c						\
+	wayland/output.h						\
+	wayland/seat.c							\
+	wayland/seat.h							\
+	wayland/server.c						\
+	wayland/server.h						\
+	wayland/xdg_shell.c						\
+	wayland/xdg_shell.h						\
+	wayland/xwayland.c						\
+	wayland/xwayland.h
 
 xfwm4_CFLAGS =								\
 	$(GLIB_CFLAGS) 							\
@@ -87,6 +104,11 @@ xfwm4_CFLAGS =								\
 	$(RANDR_CFLAGS)							\
 	$(RENDER_CFLAGS)						\
 	$(XINERAMA_CFLAGS)						\
+	$(WAYLAND_SERVER_CFLAGS)					\
+	$(WLROOTS_CFLAGS)						\
+	$(LIBINPUT_CFLAGS)						\
+	$(XKBCOMMON_CFLAGS)						\
+	$(LIBEVDEV_CFLAGS)						\	
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DDATADIR=\"$(datadir)\"					\
 	-DHELPERDIR=\"$(HELPER_PATH_PREFIX)\"				\
@@ -110,10 +132,17 @@ xfwm4_LDADD =								\
 	$(RANDR_LIBS) 							\
 	$(RENDER_LIBS)							\
 	$(XINERAMA_LIBS)						\
-	$(MATH_LIBS)
+	$(MATH_LIBS)							\
+	$(WAYLAND_SERVER_LIBS)						\
+	$(WLROOTS_LIBS)							\
+	$(LIBINPUT_LIBS)						\
+	$(XKBCOMMON_LIBS)						\
+	$(LIBEVDEV_LIBS)
 
 AM_CPPFLAGS = 								\
+	-DWLR_USE_UNSTABLE						\
 	-I${top_srcdir} 						\
+	-I${top_srcdir}/protocol					\
 	$(PLATFORM_CPPFLAGS)
 
 EXTRA_DIST = 								\

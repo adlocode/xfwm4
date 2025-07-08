@@ -135,6 +135,29 @@ XDT_CHECK_PACKAGE([LIBXFCONF], libxfconf-0, [xfconf_minimum_version],,
 XDT_CHECK_PACKAGE([LIBWNCK], [libwnck-3.0], [wnck_minimum_version])
 XDT_CHECK_PACKAGE([XINERAMA], [xinerama], [0])
 
+XDT_CHECK_PACKAGE([WAYLAND_SERVER], [wayland-server], [1.0.0])
+XDT_CHECK_PACKAGE([WLROOTS], [wlroots], [0.16.0])
+XDT_CHECK_PACKAGE([LIBINPUT], [libinput], [1.10.0])
+XDT_CHECK_PACKAGE([PIXMAN], [pixman-1], [0.34.0])
+XDT_CHECK_PACKAGE([XKBCOMMON], [xkbcommon], [0.8.0])
+XDT_CHECK_PACKAGE([EGL], [egl], [1.0.0])
+XDT_CHECK_PACKAGE([LIBEVDEV], [libevdev], [1.5.8])
+
+PKG_CHECK_MODULES(WAYLAND_PROTOCOLS, [wayland-protocols >= 1.13],
+		  [ac_wayland_protocols_pkgdatadir=`$PKG_CONFIG --variable=pkgdatadir wayland-protocols`])
+AC_SUBST(WAYLAND_PROTOCOLS_DATADIR, $ac_wayland_protocols_pkgdatadir)
+
+AC_ARG_VAR([wayland_scanner], [The wayland-scanner executable])
+AC_PATH_PROG([wayland_scanner], [wayland-scanner])
+if test x$wayland_scanner = x; then
+        if test "x$cross_compiling" != "xyes"; then
+                PKG_CHECK_MODULES(WAYLAND_SCANNER, [wayland-scanner])
+                wayland_scanner=`$PKG_CONFIG --variable=wayland_scanner wayland-scanner`
+        else
+                AC_MSG_WARN([You are cross compiling without wayland-scanner in your path.  make check will fail.])
+        fi
+fi
+
 AS_IF([test "x$USE_MAINTAINER_MODE" = "xyes"],
 [
   AC_PATH_PROG([GLIB_COMPILE_RESOURCES], [glib-compile-resources])
@@ -311,6 +334,7 @@ icons/scalable/Makefile
 po/Makefile.in
 common/Makefile
 settings-dialogs/Makefile
+protocol/Makefile
 src/Makefile
 themes/Makefile
 themes/daloa/Makefile

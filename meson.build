@@ -26,6 +26,11 @@ dependency_versions = {
   'libwnck': '>= 3.14',
   'libx11': '>= 1.6.7',
   'xinerama': '>= 1.1.4',
+  'wayland-protocols': '>=1.14',
+  'wlroots': ['>=0.16.0', '<0.17.0'],
+  'libinput': '>=1.10.0',
+  'egl': '>=1.0.0',
+  'evdev': '>=1.5.8',
 
   'libxi': '>= 1.7.10',
   'libxres': '>= 1.2.0',
@@ -50,6 +55,21 @@ xfconf = dependency('libxfconf-0', version: dependency_versions['xfconf'])
 libwnck = dependency('libwnck-3.0', version: dependency_versions['libwnck'])
 libx11 = dependency('x11', version: dependency_versions['libx11'])
 xinerama = dependency('xinerama', version: dependency_versions['xinerama'])
+wayland_server = dependency('wayland-server')
+wayland_cursor = dependency('wayland-cursor')
+wayland_egl    = dependency('wayland-egl')
+wayland_protos = dependency('wayland-protocols', version: dependency_versions['wayland-protocols'])
+pixman         = dependency('pixman-1')
+cairo          = dependency('cairo')
+pango          = dependency('pango')
+pangocairo     = dependency('pangocairo')
+glesv2	       = dependency('glesv2')
+wlroots        = dependency('wlroots', version: dependency_versions['wlroots'])
+xkbcommon      = dependency('xkbcommon')
+libinput       = dependency('libinput', version: dependency_versions['libinput'])
+egl            = dependency('egl', version: dependency_versions['egl'])
+evdev          = dependency('libevdev', version: dependency_versions['evdev'])
+libxml2        = dependency('libxml-2.0')
 
 feature_cflags = []
 
@@ -120,6 +140,16 @@ helper_path_prefix = get_option('helper-path-prefix')
 if helper_path_prefix == ''
   helper_path_prefix = get_option('prefix') / get_option('libdir')
 endif
+
+if get_option('xwayland')
+	xcb    = dependency('xcb', required: true)
+
+	if xcb.found()
+		add_project_arguments('-DUSE_XWAYLAND', language: 'c')
+	endif
+endif
+
+add_project_arguments('-DWLR_USE_UNSTABLE', language: 'c')
 
 headers = [
   'math.h',
@@ -225,6 +255,7 @@ xfce_revision_h = vcs_tag(
   replace_string: '@REVISION@',
 )
 
+subdir('protocol')
 subdir('common')
 subdir('defaults')
 subdir('helper-dialog')
